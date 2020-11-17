@@ -21,9 +21,9 @@ module puremvc {
         }
 
         /**
-         * @priority: 优先级，值高的先响应，默认为: 1
+         * @priority: 优先级，值高的先响应，默认为: 2
          */
-        registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: number = 1, args: any[] = null): Observer {
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: number = 2, args: any[] = null): Observer {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Register invalid observer: " + name);
             }
@@ -40,7 +40,7 @@ module puremvc {
             }
             // 若当前禁止直接更新，则复制列表
             else if (observers[0] === true) {
-                observers = this.$observers[name] = observers.concat();
+                observers = this.$observers[name] = observers.slice();
                 // 新生成的列表允许被更新
                 observers[0] = false;
             }
@@ -99,7 +99,7 @@ module puremvc {
             }
             // 若当前禁止直接更新，则复制列表
             if (observers[0] === true) {
-                observers = this.$observers[name] = observers.concat();
+                observers = this.$observers[name] = observers.slice();
                 // 新生成的列表允许被更新
                 observers[0] = false;
             }
@@ -157,9 +157,14 @@ module puremvc {
                 else {
                     observer.method.call(observer.caller, params);
                 }
-                // 命令允许被取消，且命令被取消
-                if (this.$isCanceled && cancelable === true) {
-                    break;
+                // 命令被取消
+                if (this.$isCanceled) {
+                    // 命令允许被取消
+                    if (cancelable === true) {
+                        break;
+                    }
+                    console.error("尝试取消不可被取消的命令：" + name);
+                    this.$isCanceled = false;
                 }
             }
             // 回归历史命令状态
