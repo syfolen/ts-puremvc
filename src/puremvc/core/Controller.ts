@@ -1,6 +1,8 @@
 
 module puremvc {
-
+    /**
+     * 控制类（命令集合）
+     */
     export class Controller {
 
         static inst: Controller = null;

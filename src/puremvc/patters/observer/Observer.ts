@@ -11,8 +11,8 @@ module puremvc {
 
         method: Function = null;
 
-        priority: number = null;
+        priority: number = 0;
 
-        receiveOnce: boolean = null;
+        receiveOnce: boolean = false;
     }
 }

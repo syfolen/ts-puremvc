@@ -1,6 +1,8 @@
 
 module puremvc {
-
+    /**
+     * 视图类（视图集合）
+     */
     export class View {
 
         static inst: View = null;
@@ -22,9 +24,6 @@ module puremvc {
             View.inst = this;
         }
 
-        /**
-         * @priority: 优先级，值高的先响应，默认为: 2
-         */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: number = 2, args: any[] = null): Observer {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Register invalid observer: " + name);
@@ -113,6 +112,7 @@ module puremvc {
                     break;
                 }
             }
+
             // 移除空列表
             if (observers.length === 0) {
                 delete this.$workings[name];

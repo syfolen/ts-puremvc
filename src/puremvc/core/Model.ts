@@ -1,6 +1,8 @@
 
 module puremvc {
-
+    /**
+     * 模型类（数据集合）
+     */
     export class Model {
 
         static inst: Model = null;
@@ -33,7 +35,7 @@ module puremvc {
             if (this.hasProxy(name) === false) {
                 throw Error("Remove non-existent proxy: " + name);
             }
-            const proxy: Proxy = this.retrieveProxy(name);
+            const proxy: Proxy = this.$proxies[name];
             delete this.$proxies[name];
             proxy.onRemove();
         }
@@ -46,6 +48,4 @@ module puremvc {
             return this.$proxies[name] !== void 0;
         }
     }
-
-
 }
