@@ -22,7 +22,7 @@ module puremvc {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Invalid mediator name: " + name);
             }
-            this.$mediatorName = name || null;
+            this.$mediatorName = name;
             this.$viewComponent = viewComponent || null;
         }
 
@@ -34,6 +34,9 @@ module puremvc {
 
         }
 
+        /**
+         * 移除感兴趣的事件列表（内置方法，请勿调用）
+         */
         removeNotificationInterests(): void {
             for (let i: number = 0; i < this.$notificationInterests.length; i++) {
                 const observer: Observer = this.$notificationInterests[i];
@@ -50,6 +53,7 @@ module puremvc {
         }
 
         /**
+         * 注册回调（此时己注册）
          * export
          */
         onRegister(): void {
@@ -57,6 +61,7 @@ module puremvc {
         }
 
         /**
+         * 移除回调（此时己移除）
          * export
          */
         onRemove(): void {

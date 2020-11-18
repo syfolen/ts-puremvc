@@ -202,7 +202,7 @@ module puremvc {
             if (this.hasMediator(name) === false) {
                 throw Error("Remove non-existent mediator " + name);
             }
-            const mediator: Mediator = this.retrieveMediator(name);
+            const mediator: Mediator = this.$mediators[name];
             delete this.$mediators[name];
             mediator.removeNotificationInterests();
             mediator.onRemove();

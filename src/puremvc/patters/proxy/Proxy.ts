@@ -22,7 +22,7 @@ module puremvc {
                 throw Error("Invalid proxy name: " + name);
             }
             this.$data = data;
-            this.$proxyName = name || null;
+            this.$proxyName = name;
         }
 
         getProxyName(): string {
@@ -30,6 +30,7 @@ module puremvc {
         }
 
         /**
+         * 注册回调（此时己注册）
          * export
          */
         onRegister(): void {
@@ -37,6 +38,7 @@ module puremvc {
         }
 
         /**
+         * 移除回调（此时己移除）
          * export
          */
         onRemove(): void {
