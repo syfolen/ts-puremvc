@@ -142,7 +142,7 @@ var puremvc;
         Model.prototype.registerProxy = function (proxy) {
             var name = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid proxy: " + name);
+                throw Error("Register invalid proxy");
             }
             if (this.hasProxy(name) === true) {
                 throw Error("Register duplicate proxy: " + name);
@@ -152,12 +152,12 @@ var puremvc;
         };
         Model.prototype.removeProxy = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid proxy: " + name);
+                throw Error("Remove invalid proxy");
             }
             if (this.hasProxy(name) === false) {
                 throw Error("Remove non-existent proxy: " + name);
             }
-            var proxy = this.retrieveProxy(name);
+            var proxy = this.$proxies[name];
             delete this.$proxies[name];
             proxy.onRemove();
         };
@@ -184,8 +184,8 @@ var puremvc;
             this.name = null;
             this.caller = null;
             this.method = null;
-            this.priority = null;
-            this.receiveOnce = null;
+            this.priority = 0;
+            this.receiveOnce = false;
         }
         return Observer;
     }());
@@ -200,7 +200,7 @@ var puremvc;
                 throw Error("Invalid proxy name: " + name);
             }
             _this.$data = data;
-            _this.$proxyName = name || null;
+            _this.$proxyName = name;
             return _this;
         }
         Proxy.prototype.getProxyName = function () {
@@ -245,7 +245,7 @@ var puremvc;
             if (priority === void 0) { priority = 2; }
             if (args === void 0) { args = null; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid observer: " + name);
+                throw Error("Register invalid observer");
             }
             if (method === void 0 || method === null) {
                 throw Error("Register invalid observer method: " + name);
@@ -297,7 +297,7 @@ var puremvc;
         };
         View.prototype.removeObserver = function (name, method, caller) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid observer: " + name);
+                throw Error("Remove invalid observer");
             }
             if (method === void 0 || method === null) {
                 throw Error("Remove invalid observer method: " + name);
@@ -332,7 +332,7 @@ var puremvc;
         View.prototype.notifyObservers = function (name, args, cancelable) {
             if (cancelable === void 0) { cancelable = true; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Notify invalid command: " + name);
+                throw Error("Notify invalid command");
             }
             var observers = this.$observers[name];
             if (observers === void 0) {
@@ -374,7 +374,7 @@ var puremvc;
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid mediator: " + name);
+                throw Error("Register invalid mediator");
             }
             if (this.hasMediator(name) === true) {
                 throw Error("Register duplicate mediator: " + name);
@@ -385,12 +385,12 @@ var puremvc;
         };
         View.prototype.removeMediator = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid mediator: " + name);
+                throw Error("Remove invalid mediator");
             }
             if (this.hasMediator(name) === false) {
                 throw Error("Remove non-existent mediator " + name);
             }
-            var mediator = this.retrieveMediator(name);
+            var mediator = this.$mediators[name];
             delete this.$mediators[name];
             mediator.removeNotificationInterests();
             mediator.onRemove();
@@ -435,7 +435,7 @@ var puremvc;
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Invalid mediator name: " + name);
             }
-            _this.$mediatorName = name || null;
+            _this.$mediatorName = name;
             _this.$viewComponent = viewComponent || null;
             return _this;
         }

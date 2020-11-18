@@ -74,8 +74,14 @@ declare module puremvc {
 
         constructor(name: string, data?: any);
 
+        /**
+         * 注册回调（此时己注册）
+         */
         onRegister(): void;
 
+        /**
+         * 移除回调（此时己移除）
+         */
         onRemove(): void;
 
         getData(): any;
@@ -107,8 +113,14 @@ declare module puremvc {
 
         protected $handleNotification(name: string, method: Function, receiveOnce?: boolean, priority?: number, args?: any[]): void;
 
+        /**
+         * 注册回调（此时己注册）
+         */
         onRegister(): void;
 
+        /**
+         * 移除回调（此时己移除）
+         */
         onRemove(): void;
 
         getViewComponent(): any;
