@@ -272,7 +272,7 @@ var puremvc;
                         var s0 = b0 === true ? "" : "priority:" + priority;
                         var s1 = b1 === true ? "" : "receiveOnce:" + receiveOnce;
                         var s2 = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn("重复注册事件，个别参数未更新：" + ("" + s0 + s2 + s1));
+                        console.warn("\u91CD\u590D\u6CE8\u518C\u4E8B\u4EF6\uFF0C\u4E2A\u522B\u53C2\u6570\u672A\u66F4\u65B0\uFF1A" + s0 + s2 + s1);
                     }
                     return null;
                 }
@@ -360,7 +360,7 @@ var puremvc;
                     if (cancelable === true) {
                         break;
                     }
-                    console.error("尝试取消不可被取消的命令：" + name);
+                    console.error("\u5C1D\u8BD5\u53D6\u6D88\u4E0D\u53EF\u88AB\u53D6\u6D88\u7684\u547D\u4EE4\uFF1A" + name);
                     this.$isCanceled = false;
                 }
             }
@@ -388,7 +388,7 @@ var puremvc;
                 throw Error("Remove invalid mediator");
             }
             if (this.hasMediator(name) === false) {
-                throw Error("Remove non-existent mediator " + name);
+                throw Error("Remove non-existent mediator: " + name);
             }
             var mediator = this.$mediators[name];
             delete this.$mediators[name];
