@@ -47,8 +47,8 @@ module puremvc {
         /**
          * export
          */
-        protected $handleNotification(name: string, method: Function, receiveOnce?: boolean, priority?: number, args?: any[]): void {
-            const observer: Observer = View.inst.registerObserver(name, method, this, receiveOnce, priority, args);
+        protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
+            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
             observer && this.$notificationInterests.push(observer);
         }
 

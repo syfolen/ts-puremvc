@@ -450,8 +450,8 @@ var puremvc;
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
         };
-        Mediator.prototype.$handleNotification = function (name, method, receiveOnce, priority, args) {
-            var observer = View.inst.registerObserver(name, method, this, receiveOnce, priority, args);
+        Mediator.prototype.$handleNotification = function (name, method, priority, args) {
+            var observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
             observer && this.$notificationInterests.push(observer);
         };
         Mediator.prototype.onRegister = function () {

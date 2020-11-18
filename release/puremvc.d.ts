@@ -111,7 +111,7 @@ declare module puremvc {
 
         constructor(name: string, viewComponent?: any);
 
-        protected $handleNotification(name: string, method: Function, receiveOnce?: boolean, priority?: number, args?: any[]): void;
+        protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void;
 
         /**
          * 注册回调（此时己注册）
