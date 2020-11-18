@@ -9,7 +9,7 @@ module puremvc {
         private $observers: IDictionary<Array<boolean | Observer>> = {};
 
         private $isCanceled: boolean = false;
-        private $onceObservers: Array<Observer> = [];
+        private $onceObservers: Observer[] = [];
 
         private $recycle: Observer[] = [];
 
@@ -66,7 +66,7 @@ module puremvc {
                 }
             }
 
-            const observer: Observer = this.$recycle.pop() || new Observer();
+            const observer: Observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
             observer.args = args;
             observer.name = name;
             observer.caller = caller;
