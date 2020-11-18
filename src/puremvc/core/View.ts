@@ -8,7 +8,6 @@ module puremvc {
         static inst: View = null;
 
         private $pool: Observer[] = [];
-
         private $mediators: { [name: string]: Mediator } = {};
 
         private $workings: { [name: string]: boolean } = {};
