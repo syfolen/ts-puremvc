@@ -1,17 +1,19 @@
 
 module puremvc {
-
+    /**
+     * export
+     */
     export class Observer {
-
-        args: any[] = null;
 
         name: string = null;
 
-        caller: Object = null;
+        caller: any = null;
 
         method: Function = null;
 
-        priority: number = 0;
+        option: IOption = null;
+
+        priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID;
 
         receiveOnce: boolean = false;
     }

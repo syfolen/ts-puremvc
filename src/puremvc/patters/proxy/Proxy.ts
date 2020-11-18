@@ -19,7 +19,7 @@ module puremvc {
         constructor(name: string, data?: any) {
             super();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid proxy name: " + name);
+                throw Error("无效的Proxy名字");
             }
             this.$data = data;
             this.$proxyName = name;

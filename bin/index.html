@@ -29,18 +29,30 @@
 	<!-- 物理引擎matter.js -->
 	<!--用户自定义顺序文件添加到这里-->
 	<!--jsfile--Custom-->
+	<!--long-->
+    <script type="text/javascript" src="libs/long.js"></script>
+	<!--suncom-->
+	<script type="text/javascript" src="libs/suncom.js"></script>
 	<!--jsfile--Custom-->
 
 	<!--自定义的js(src文件夹下)文件自动添加到下面jsfile模块标签里面里-->
 	<!--删除标签，ide不会自动添加js文件，请谨慎操作-->
 	<!--jsfile--startTag-->
 	<script src="js/test/TetsReceiveOnceAndCancel.js"></script>
+	<script src="js/suncore/NotifyKey.js"></script>
+	<script src="js/suncore/msgq/MsgQModEnum.js"></script>
+	<script src="js/suncore/message/ModuleEnum.js"></script>
 	<script src="js/puremvc/patters/observer/Observer.js"></script>
+	<script src="js/puremvc/mutex/MutexScope.js"></script>
+	<script src="js/puremvc/mutex/MutexLocker.js"></script>
+	<script src="js/puremvc/interfaces/IOption.js"></script>
+	<script src="js/puremvc/interfaces/IMutexSnapshot.js"></script>
 	<script src="js/puremvc/interfaces/ICommand.js"></script>
 	<script src="js/puremvc/Def.js"></script>
 	<script src="js/puremvc/core/View.js"></script>
 	<script src="js/puremvc/core/Model.js"></script>
 	<script src="js/puremvc/core/Controller.js"></script>
+	<script src="js/puremvc/constants/CareModuleID.js"></script>
 	<script src="js/puremvc/patters/facade/Facade.js"></script>
 	<script src="js/puremvc/patters/observer/Notifier.js"></script>
 	<script src="js/puremvc/patters/command/MacroCommand.js"></script>
@@ -49,6 +61,7 @@
 	<script src="js/puremvc/patters/proxy/Proxy.js"></script>
 	<script src="js/test/TestController.js"></script>
 	<script src="js/test/TestModel.js"></script>
+	<script src="js/test/TestMutex.js"></script>
 	<script src="js/test/TestPriority.js"></script>
 	<script src="js/test/TestView.js"></script>
 	<script src="js/ui/layaUI.max.all.js"></script>

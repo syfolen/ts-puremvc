@@ -7,11 +7,11 @@ module puremvc {
 
         static inst: Controller = null;
 
-        private $commands: IDictionary<new () => ICommand> = {};
+        private $commands: { [name: string]: new () => ICommand } = {};
 
         constructor() {
             if (Controller.inst !== null) {
-                throw Error("Controller singleton already constructed!");
+                throw Error("重复构建控制类！！！");
             }
             Controller.inst = this;
         }
@@ -26,17 +26,17 @@ module puremvc {
             }
         }
 
-        registerCommand(name: string, cls: new () => ICommand, priority: number, args: any[]): void {
+        registerCommand(name: string, cls: new () => ICommand, priority: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
             if (this.hasCommand(name) === true) {
-                throw Error("Register duplicate command: " + name);
+                throw Error("重复注册命令：" + name);
             }
             this.$commands[name] = cls;
-            View.inst.registerObserver(name, this.executeCommand, this, false, priority, args);
+            View.inst.registerObserver(name, this.executeCommand, this, false, priority, option);
         }
 
         removeCommand(name: string): void {
             if (this.hasCommand(name) === false) {
-                throw Error("Remove non-existent command: " + name);
+                throw Error("移除不存在的命令：" + name);
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);

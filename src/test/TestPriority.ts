@@ -8,20 +8,20 @@ module test {
         constructor() {
             console.log("test priority");
             puremvc.Facade.getInstance().registerMediator(new CUIMediator(CUIMediator.NAME));
-            puremvc.Facade.getInstance().registerCommand("CUI_TEST", TestCommand, 9);
+            puremvc.Facade.getInstance().registerCommand("CUI_TEST", TestCommand, suncom.EventPriorityEnum.OSL);
 
-            puremvc.Facade.getInstance().registerObserver("CUI_TEST", this.$testFwl, this, false, 7);
-            puremvc.Facade.getInstance().registerObserver("CUI_TEST", this.$testEgl, this, false, 8);
+            puremvc.Facade.getInstance().registerObserver("CUI_TEST", this.$testFwl, this, false, suncom.EventPriorityEnum.FWL);
+            puremvc.Facade.getInstance().registerObserver("CUI_TEST", this.$testEgl, this, false, suncom.EventPriorityEnum.EGL);
 
             puremvc.Facade.getInstance().sendNotification("CUI_TEST");
             this.$aEqualsB(array, [
-                9,
-                8,
-                7,
-                3,
-                2,
-                1,
-                0
+                suncom.EventPriorityEnum.OSL,
+                suncom.EventPriorityEnum.EGL,
+                suncom.EventPriorityEnum.FWL,
+                suncom.EventPriorityEnum.HIGH,
+                suncom.EventPriorityEnum.MID,
+                suncom.EventPriorityEnum.LOW,
+                suncom.EventPriorityEnum.LOWEST
             ]);
 
             puremvc.Facade.getInstance().removeCommand("CUI_TEST");
@@ -31,14 +31,14 @@ module test {
         }
 
         private $testFwl(): void {
-            array.push(7);
+            array.push(suncom.EventPriorityEnum.FWL);
         }
 
         private $testEgl(): void {
-            array.push(8);
+            array.push(suncom.EventPriorityEnum.EGL);
         }
 
-        private $aEqualsB(a: number[], b: number[]): void {
+        private $aEqualsB(a: suncom.EventPriorityEnum[], b: suncom.EventPriorityEnum[]): void {
             for (let i = 0; i < a.length; i++) {
                 console.assert(a[i] === b[i], `当前：[${a.join(",")}], 预期：[${b.join(",")}]`);
             }
@@ -58,33 +58,33 @@ module test {
         }
 
         listNotificationInterests(): void {
-            this.$handleNotification("CUI_TEST", this.$testLowest, 0);
-            this.$handleNotification("CUI_TEST", this.$testLow, 1);
-            this.$handleNotification("CUI_TEST", this.$testMid, 2);
-            this.$handleNotification("CUI_TEST", this.$testHigh, 3);
+            this.$handleNotification("CUI_TEST", this.$testLowest, suncom.EventPriorityEnum.LOWEST);
+            this.$handleNotification("CUI_TEST", this.$testLow, suncom.EventPriorityEnum.LOW);
+            this.$handleNotification("CUI_TEST", this.$testMid, suncom.EventPriorityEnum.MID);
+            this.$handleNotification("CUI_TEST", this.$testHigh, suncom.EventPriorityEnum.HIGH);
         }
 
         private $testHigh(): void {
-            array.push(3);
+            array.push(suncom.EventPriorityEnum.HIGH);
         }
 
         private $testMid(): void {
-            array.push(2);
+            array.push(suncom.EventPriorityEnum.MID);
         }
 
         private $testLow(): void {
-            array.push(1);
+            array.push(suncom.EventPriorityEnum.LOW);
         }
 
         private $testLowest(): void {
-            array.push(0);
+            array.push(suncom.EventPriorityEnum.LOWEST);
         }
     }
 
     class TestCommand extends puremvc.SimpleCommand {
 
         execute(): void {
-            array.push(9);
+            array.push(suncom.EventPriorityEnum.OSL);
         }
     }
 }

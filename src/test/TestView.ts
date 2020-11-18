@@ -41,7 +41,7 @@ module test {
         }
 
         listNotificationInterests(): void {
-            this.$handleNotification("CUI_TEST", this.$test3, 1);
+            this.$handleNotification("CUI_TEST", this.$test3, suncom.EventPriorityEnum.LOW);
         }
 
         private $test3(data: IData, msg: number): void {

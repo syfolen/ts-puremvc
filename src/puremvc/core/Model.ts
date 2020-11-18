@@ -7,11 +7,11 @@ module puremvc {
 
         static inst: Model = null;
 
-        private $proxies: IDictionary<Proxy> = {};
+        private $proxies: { [name: string]: Proxy } = {};
 
         constructor() {
             if (Model.inst !== null) {
-                throw Error("Model singleton already constructed!");
+                throw Error("重复构建模型类！！！");
             }
             Model.inst = this;
         }
@@ -19,10 +19,10 @@ module puremvc {
         registerProxy(proxy: Proxy): void {
             const name: string = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid proxy");
+                throw Error("注册无效的Proxy");
             }
             if (this.hasProxy(name) === true) {
-                throw Error("Register duplicate proxy: " + name);
+                throw Error("重复注册Proxy：" + name);
             }
             this.$proxies[name] = proxy;
             proxy.onRegister();
@@ -30,10 +30,10 @@ module puremvc {
 
         removeProxy(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid proxy");
+                throw Error("移除无效的Proxy");
             }
             if (this.hasProxy(name) === false) {
-                throw Error("Remove non-existent proxy: " + name);
+                throw Error("移除不存在的Proxy：" + name);
             }
             const proxy: Proxy = this.$proxies[name];
             delete this.$proxies[name];
@@ -41,10 +41,16 @@ module puremvc {
         }
 
         retrieveProxy(name: string): Proxy {
+            if (MutexLocker.enableMMIAction() === false) {
+                throw Error(`非MMI模块禁用接口`);
+            }
             return this.$proxies[name] || null;
         }
 
         hasProxy(name: string): boolean {
+            if (MutexLocker.enableMMIAction() === false) {
+                throw Error(`非MMI模块禁用接口`);
+            }
             return this.$proxies[name] !== void 0;
         }
     }

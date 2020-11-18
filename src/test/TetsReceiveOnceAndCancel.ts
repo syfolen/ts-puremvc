@@ -9,6 +9,9 @@ module test {
             const data: IData = { msg: 0 };
             puremvc.Facade.getInstance().registerObserver("CUI_TEST", this.$testNor, this, false);
             puremvc.Facade.getInstance().registerObserver("CUI_TEST", this.$testOnce, this, true);
+            console.assert(puremvc.Facade.getInstance().hasObserver("CUI_TEST", this.$testNor, this), `事件未注册成功或查询失败`);
+            console.assert(puremvc.Facade.getInstance().hasObserver("CUI_TEST", this.$testNor, null), `仅指定method时查询事件失败`);
+            console.assert(puremvc.Facade.getInstance().hasObserver("CUI_TEST", null, this), `仅指定caller时查询事件失败`);
 
             puremvc.Facade.getInstance().sendNotification("CUI_TEST", data);
             console.assert(data.msg === 12, `不同回调监听同一个事件时未成功`);
