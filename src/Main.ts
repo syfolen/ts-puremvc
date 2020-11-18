@@ -2,11 +2,19 @@
 //程序入口
 Laya.init(600, 400, Laya.WebGL);
 
-puremvc.Facade.getInstance().registerObserver("ok", func, null, true, 1, ["a"]);
+class Facade extends puremvc.Facade {
 
-puremvc.Facade.getInstance().sendNotification("ok", "b");
-puremvc.Facade.getInstance().sendNotification("ok", "b");
-
-function func(s0: string, s1: string): void {
-    console.log(s0, s1)
+	static getInstance(): puremvc.Facade {
+		return puremvc.Facade.inst || new Facade();
+	}
 }
+
+setTimeout(() => {
+	Facade.getInstance();
+
+	new test.TestController();
+	new test.TestModel();
+	new test.TestView();
+	new test.TestPriority();
+	new test.TetsReceiveOnceAndCancel();
+}, 500);
