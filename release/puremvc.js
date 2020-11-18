@@ -13,11 +13,17 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var puremvc;
 (function (puremvc) {
+    var CareModuleID;
+    (function (CareModuleID) {
+        CareModuleID[CareModuleID["NONE"] = 65535] = "NONE";
+        CareModuleID[CareModuleID["CUSTOM"] = 65536] = "CUSTOM";
+        CareModuleID[CareModuleID["TIMELINE"] = 65537] = "TIMELINE";
+    })(CareModuleID = puremvc.CareModuleID || (puremvc.CareModuleID = {}));
     var Controller = (function () {
         function Controller() {
             this.$commands = {};
             if (Controller.inst !== null) {
-                throw Error("Controller singleton already constructed!");
+                throw Error("重复构建控制类！！！");
             }
             Controller.inst = this;
         }
@@ -30,16 +36,16 @@ var puremvc;
                 cmd.execute.call(cmd, args);
             }
         };
-        Controller.prototype.registerCommand = function (name, cls, priority, args) {
+        Controller.prototype.registerCommand = function (name, cls, priority, option) {
             if (this.hasCommand(name) === true) {
-                throw Error("Register duplicate command: " + name);
+                throw Error("重复注册命令：" + name);
             }
             this.$commands[name] = cls;
-            View.inst.registerObserver(name, this.executeCommand, this, false, priority, args);
+            View.inst.registerObserver(name, this.executeCommand, this, false, priority, option);
         };
         Controller.prototype.removeCommand = function (name) {
             if (this.hasCommand(name) === false) {
-                throw Error("Remove non-existent command: " + name);
+                throw Error("移除不存在的命令：" + name);
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
@@ -60,7 +66,7 @@ var puremvc;
             this.$model = new Model();
             this.$controller = new Controller();
             if (Facade.inst !== null) {
-                throw Error("Facade singleton already constructed!");
+                throw Error("重复构建PureMVC外观类！！！");
             }
             Facade.inst = this;
             this.$initializeFacade();
@@ -72,9 +78,16 @@ var puremvc;
             return Facade.inst;
         };
         Facade.prototype.$initializeFacade = function () {
+            this.$initMsgQ();
             this.$initializeModel();
             this.$initializeView();
             this.$initializeController();
+        };
+        Facade.prototype.$initMsgQ = function () {
+            MutexLocker.scope = new MutexScope();
+            MutexLocker.locker = new MutexScope();
+            MutexLocker.msgQMap["sun"] = suncore.MsgQModEnum.KAL;
+            MutexLocker.msgQMap["MMI"] = suncore.MsgQModEnum.MMI;
         };
         Facade.prototype.$initializeModel = function () {
         };
@@ -82,49 +95,92 @@ var puremvc;
         };
         Facade.prototype.$initializeController = function () {
         };
-        Facade.prototype.registerObserver = function (name, method, caller, receiveOnce, priority, args) {
-            this.$view.registerObserver(name, method, caller, receiveOnce, priority, args);
+        Facade.prototype.$regMMICmd = function (msgQMod, prefix) {
+            this.$regMsgQCmd(msgQMod, prefix);
+            MutexLocker.mmiMsgQMap[msgQMod] = true;
+        };
+        Facade.prototype.$regMsgQCmd = function (msgQMod, prefix) {
+            MutexLocker.checkPrefix = true;
+            MutexLocker.msgQMap[prefix] = msgQMod;
+            MutexLocker.msgQCmd[msgQMod] = prefix;
+        };
+        Facade.prototype.$setCareStatForCmd = function (cmd) {
+            this.$view.setCareStatForCmd(cmd);
+        };
+        Facade.prototype.registerObserver = function (name, method, caller, receiveOnce, priority, option) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
+            var observer = this.$view.registerObserver(name, method, caller, receiveOnce, priority, option);
+            MutexLocker.deactive();
+            return observer;
         };
         Facade.prototype.removeObserver = function (name, method, caller) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
             this.$view.removeObserver(name, method, caller);
+            MutexLocker.deactive();
         };
-        Facade.prototype.registerCommand = function (name, cls, priority, args) {
-            this.$controller.registerCommand(name, cls, priority, args);
+        Facade.prototype.hasObserver = function (name, method, caller) {
+            MutexLocker.deactive();
+            return this.$view.hasObserver(name, method, caller);
+        };
+        Facade.prototype.registerCommand = function (name, cls, priority, option) {
+            MutexLocker.deactive();
+            this.$controller.registerCommand(name, cls, priority, option);
         };
         Facade.prototype.removeCommand = function (name) {
+            MutexLocker.deactive();
             this.$controller.removeCommand(name);
         };
         Facade.prototype.hasCommand = function (name) {
+            MutexLocker.deactive();
             return this.$controller.hasCommand(name);
         };
         Facade.prototype.registerProxy = function (proxy) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
             this.$model.registerProxy(proxy);
+            MutexLocker.deactive();
         };
         Facade.prototype.removeProxy = function (name) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
             this.$model.removeProxy(name);
+            MutexLocker.deactive();
         };
         Facade.prototype.retrieveProxy = function (name) {
-            return this.$model.retrieveProxy(name);
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
+            var proxy = this.$model.retrieveProxy(name);
+            MutexLocker.deactive();
+            return proxy;
         };
         Facade.prototype.hasProxy = function (name) {
+            MutexLocker.deactive();
             return this.$model.hasProxy(name);
         };
         Facade.prototype.registerMediator = function (mediator) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
             this.$view.registerMediator(mediator);
+            MutexLocker.deactive();
         };
         Facade.prototype.removeMediator = function (name) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
             this.$view.removeMediator(name);
+            MutexLocker.deactive();
         };
         Facade.prototype.retrieveMediator = function (name) {
-            return this.$view.retrieveMediator(name);
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
+            var mediator = this.$view.retrieveMediator(name);
+            MutexLocker.deactive();
+            return mediator;
         };
         Facade.prototype.hasMediator = function (name) {
+            MutexLocker.deactive();
             return this.$view.hasMediator(name);
         };
-        Facade.prototype.sendNotification = function (name, args, cancelable) {
-            this.$view.notifyObservers(name, args, cancelable);
+        Facade.prototype.sendNotification = function (name, args, cancelable, force) {
+            MutexLocker.active(suncore.MsgQModEnum.MMI);
+            this.$view.notifyObservers(name, args, cancelable, force);
+            MutexLocker.deactive();
         };
         Facade.prototype.notifyCancel = function () {
+            MutexLocker.deactive();
             this.$view.notifyCancel();
         };
         Facade.inst = null;
@@ -135,56 +191,271 @@ var puremvc;
         function Model() {
             this.$proxies = {};
             if (Model.inst !== null) {
-                throw Error("Model singleton already constructed!");
+                throw Error("重复构建模型类！！！");
             }
             Model.inst = this;
         }
         Model.prototype.registerProxy = function (proxy) {
             var name = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid proxy");
+                throw Error("注册无效的Proxy");
             }
             if (this.hasProxy(name) === true) {
-                throw Error("Register duplicate proxy: " + name);
+                throw Error("重复注册Proxy：" + name);
             }
             this.$proxies[name] = proxy;
             proxy.onRegister();
         };
         Model.prototype.removeProxy = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid proxy");
+                throw Error("移除无效的Proxy");
             }
             if (this.hasProxy(name) === false) {
-                throw Error("Remove non-existent proxy: " + name);
+                throw Error("移除不存在的Proxy：" + name);
             }
             var proxy = this.$proxies[name];
             delete this.$proxies[name];
             proxy.onRemove();
         };
         Model.prototype.retrieveProxy = function (name) {
+            if (MutexLocker.enableMMIAction() === false) {
+                throw Error("\u975EMMI\u6A21\u5757\u7981\u7528\u63A5\u53E3");
+            }
             return this.$proxies[name] || null;
         };
         Model.prototype.hasProxy = function (name) {
+            if (MutexLocker.enableMMIAction() === false) {
+                throw Error("\u975EMMI\u6A21\u5757\u7981\u7528\u63A5\u53E3");
+            }
             return this.$proxies[name] !== void 0;
         };
         Model.inst = null;
         return Model;
     }());
     puremvc.Model = Model;
-    var Notifier = (function () {
-        function Notifier() {
-            this.facade = Facade.getInstance();
+    var MutexScope = (function () {
+        function MutexScope() {
+            this.$actMsgQMod = suncore.MsgQModEnum.NIL;
+            this.$curMsgQMod = suncore.MsgQModEnum.NIL;
+            this.$target = {};
+            this.$snapshots = [];
         }
+        MutexScope.prototype.asserts = function (msgQMod, target) {
+            if (msgQMod === suncore.MsgQModEnum.KAL) {
+                return;
+            }
+            if (this.$curMsgQMod === suncore.MsgQModEnum.NIL || this.$curMsgQMod === suncore.MsgQModEnum.KAL) {
+                return;
+            }
+            if (this.$curMsgQMod === suncore.MsgQModEnum.MMI) {
+                if (msgQMod === suncore.MsgQModEnum.MMI || MutexLocker.mmiMsgQMap[msgQMod] === true) {
+                    return;
+                }
+            }
+            else if (this.$curMsgQMod === msgQMod) {
+                return;
+            }
+            else if (msgQMod === suncore.MsgQModEnum.MMI && MutexLocker.mmiMsgQMap[this.$curMsgQMod] === true) {
+                return;
+            }
+            if (target === null) {
+                throw Error("\u7981\u6B62\u8DE8\u6A21\u5757\u4F20\u9012\u6D88\u606F\uFF0Csrc:" + suncore.MsgQModEnum[this.$curMsgQMod] + ", dest:" + suncore.MsgQModEnum[msgQMod]);
+            }
+            else {
+                throw Error("\u7981\u6B62\u8DE8\u6A21\u5757\u76D1\u542C\u6D88\u606F\uFF0Csrc:" + suncore.MsgQModEnum[this.$curMsgQMod] + ", dest:" + suncore.MsgQModEnum[msgQMod]);
+            }
+        };
+        MutexScope.prototype.update = function (target) {
+            this.$target = target;
+            if (target instanceof puremvc.Notifier) {
+                this.$actMsgQMod = target.msgQMod;
+            }
+            else {
+                this.$actMsgQMod = suncore.MsgQModEnum.MMI;
+            }
+            var prefix = target[MutexScope.MUTEX_PREFIX_KEY] || null;
+            if (prefix === null) {
+                this.$curMsgQMod = this.$actMsgQMod;
+            }
+            else {
+                this.$curMsgQMod = MutexLocker.msgQMap[prefix];
+            }
+        };
+        MutexScope.prototype.lock = function (msgQMod) {
+            var a = this.$target[MutexScope.MUTEX_REFERENCE_KAL] || 0;
+            var b = this.$target[MutexScope.MUTEX_REFERENCE_MMI] || 0;
+            var c = this.$target[MutexScope.MUTEX_REFERENCE_ANY] || 0;
+            if (msgQMod === suncore.MsgQModEnum.KAL) {
+                a++;
+            }
+            else if (msgQMod === suncore.MsgQModEnum.MMI) {
+                b++;
+            }
+            else {
+                c++;
+            }
+            if (this.$curMsgQMod === suncore.MsgQModEnum.NIL || this.$curMsgQMod === suncore.MsgQModEnum.KAL) {
+                this.$curMsgQMod = msgQMod;
+            }
+            else if (this.$curMsgQMod === suncore.MsgQModEnum.MMI && msgQMod !== suncore.MsgQModEnum.KAL) {
+                this.$curMsgQMod = msgQMod;
+            }
+            this.$cache(a, b, c, false);
+        };
+        MutexScope.prototype.unlock = function (msgQMod) {
+            var a = this.$target[MutexScope.MUTEX_REFERENCE_KAL] || 0;
+            var b = this.$target[MutexScope.MUTEX_REFERENCE_MMI] || 0;
+            var c = this.$target[MutexScope.MUTEX_REFERENCE_ANY] || 0;
+            if (msgQMod === suncore.MsgQModEnum.KAL) {
+                a--;
+            }
+            else if (msgQMod === suncore.MsgQModEnum.MMI) {
+                b--;
+            }
+            else {
+                c--;
+            }
+            if (a < 0 || b < 0 || c < 0) {
+                throw Error("\u4E92\u65A5\u4F53\u91CA\u653E\u9519\u8BEF\uFF1AKAL[" + a + "], MMI[" + b + "], ANY[" + c + "]");
+            }
+            if (this.$curMsgQMod === this.$actMsgQMod) {
+            }
+            else if (c > 0) {
+            }
+            else if (b > 0) {
+                this.$curMsgQMod = suncore.MsgQModEnum.MMI;
+            }
+            else if (a > 0) {
+                this.$curMsgQMod = suncore.MsgQModEnum.KAL;
+            }
+            else {
+                this.$curMsgQMod = this.$actMsgQMod;
+            }
+            this.$cache(a, b, c, true);
+        };
+        MutexScope.prototype.active = function (msgQMod) {
+            if (this.$actMsgQMod === suncore.MsgQModEnum.NIL) {
+                this.$actMsgQMod = this.$curMsgQMod = msgQMod;
+            }
+        };
+        MutexScope.prototype.deactive = function () {
+            var a = this.$target[MutexScope.MUTEX_REFERENCE_KAL] || 0;
+            var b = this.$target[MutexScope.MUTEX_REFERENCE_MMI] || 0;
+            var c = this.$target[MutexScope.MUTEX_REFERENCE_ANY] || 0;
+            if (a === 0 && b === 0 && c === 0) {
+                this.$actMsgQMod = this.$curMsgQMod = suncore.MsgQModEnum.NIL;
+            }
+        };
+        MutexScope.prototype.$cache = function (a, b, c, d) {
+            if (a > 0) {
+                this.$target[MutexScope.MUTEX_REFERENCE_KAL] = a;
+            }
+            else if (d === true && this.$target[MutexScope.MUTEX_REFERENCE_KAL] > 0) {
+                delete this.$target[MutexScope.MUTEX_REFERENCE_KAL];
+            }
+            if (b > 0) {
+                this.$target[MutexScope.MUTEX_REFERENCE_MMI] = b;
+            }
+            else if (d === true && this.$target[MutexScope.MUTEX_REFERENCE_MMI] > 0) {
+                delete this.$target[MutexScope.MUTEX_REFERENCE_MMI];
+            }
+            if (c > 0) {
+                this.$target[MutexScope.MUTEX_PREFIX_KEY] = MutexLocker.msgQCmd[this.$curMsgQMod];
+                this.$target[MutexScope.MUTEX_REFERENCE_ANY] = c;
+            }
+            else if (d === true && this.$target[MutexScope.MUTEX_REFERENCE_ANY] > 0) {
+                delete this.$target[MutexScope.MUTEX_PREFIX_KEY];
+                delete this.$target[MutexScope.MUTEX_REFERENCE_ANY];
+            }
+        };
+        MutexScope.prototype.backup = function (target) {
+            var msgQMod = null;
+            if (target instanceof puremvc.Notifier) {
+                msgQMod = target.msgQMod;
+            }
+            else {
+                msgQMod = suncore.MsgQModEnum.MMI;
+            }
+            if (msgQMod !== this.$curMsgQMod) {
+                var snapshot = {
+                    data: this.$target,
+                    actMsgQMod: this.$actMsgQMod,
+                    curMsgQMod: this.$curMsgQMod
+                };
+                this.$snapshots.push(snapshot);
+                this.$target = {};
+                this.$actMsgQMod = this.$curMsgQMod = msgQMod;
+            }
+            else {
+                this.$snapshots.push(null);
+            }
+        };
+        MutexScope.prototype.restore = function () {
+            var snapshot = this.$snapshots.pop() || null;
+            if (snapshot !== null) {
+                this.$target = snapshot.data;
+                this.$actMsgQMod = snapshot.actMsgQMod;
+                this.$curMsgQMod = snapshot.curMsgQMod;
+            }
+        };
+        Object.defineProperty(MutexScope.prototype, "curMsgQMod", {
+            get: function () {
+                return this.$curMsgQMod;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        MutexScope.MUTEX_PREFIX_KEY = "puremvc$mutex$prefix";
+        MutexScope.MUTEX_REFERENCE_KAL = "puremvc$mutex$reference$kal";
+        MutexScope.MUTEX_REFERENCE_MMI = "puremvc$mutex$reference$mmi";
+        MutexScope.MUTEX_REFERENCE_ANY = "puremvc$mutex$reference$any";
+        return MutexScope;
+    }());
+    puremvc.MutexScope = MutexScope;
+    var Notifier = (function () {
+        function Notifier(msgQMod) {
+            this.$msgQMod = suncore.MsgQModEnum.MMI;
+            this.$facade = Facade.getInstance();
+            this.$destroyed = false;
+            if (msgQMod !== void 0) {
+                this.$msgQMod = msgQMod;
+            }
+        }
+        Notifier.prototype.destroy = function () {
+            this.$destroyed = true;
+        };
+        Object.defineProperty(Notifier.prototype, "facade", {
+            get: function () {
+                MutexLocker.active(this.$msgQMod);
+                return this.$facade;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(Notifier.prototype, "msgQMod", {
+            get: function () {
+                return this.$msgQMod;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(Notifier.prototype, "destroyed", {
+            get: function () {
+                return this.$destroyed;
+            },
+            enumerable: false,
+            configurable: true
+        });
         return Notifier;
     }());
     puremvc.Notifier = Notifier;
     var Observer = (function () {
         function Observer() {
-            this.args = null;
             this.name = null;
             this.caller = null;
             this.method = null;
-            this.priority = 0;
+            this.option = null;
+            this.priority = suncom.EventPriorityEnum.MID;
             this.receiveOnce = false;
         }
         return Observer;
@@ -197,7 +468,7 @@ var puremvc;
             _this.$proxyName = null;
             _this.$data = void 0;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid proxy name: " + name);
+                throw Error("无效的Proxy名字");
             }
             _this.$data = data;
             _this.$proxyName = name;
@@ -235,20 +506,38 @@ var puremvc;
             this.$isCanceled = false;
             this.$onceObservers = [];
             this.$recycle = [];
+            this.$modStatMap = {};
+            this.$careStatCmds = {};
             if (View.inst !== null) {
-                throw Error("View singleton already constructed!");
+                throw Error("重复构建视图类！！！");
             }
             View.inst = this;
+            this.registerObserver(suncore.NotifyKey.START_TIMELINE, this.$onStartTimeline, this);
+            this.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onPauseTimeline, this);
         }
-        View.prototype.registerObserver = function (name, method, caller, receiveOnce, priority, args) {
+        View.prototype.$onStartTimeline = function (mod, pause) {
+            if (pause === false) {
+                this.$modStatMap[mod] = true;
+            }
+            else {
+                this.$modStatMap[mod] = false;
+            }
+        };
+        View.prototype.$onPauseTimeline = function (mod, stop) {
+            this.$modStatMap[mod] = false;
+        };
+        View.prototype.setCareStatForCmd = function (cmd) {
+            this.$careStatCmds[cmd] = true;
+        };
+        View.prototype.registerObserver = function (name, method, caller, receiveOnce, priority, option) {
             if (receiveOnce === void 0) { receiveOnce = false; }
-            if (priority === void 0) { priority = 2; }
-            if (args === void 0) { args = null; }
+            if (priority === void 0) { priority = suncom.EventPriorityEnum.MID; }
+            if (option === void 0) { option = 1; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid observer");
+                throw Error("注册无效的监听");
             }
             if (method === void 0 || method === null) {
-                throw Error("Register invalid observer method: " + name);
+                throw Error("注册无效的监听回调：" + name);
             }
             if (caller === void 0) {
                 caller = null;
@@ -261,11 +550,20 @@ var puremvc;
                 this.$workings[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
+            option = this.$createOption(option);
+            if (option.delay === void 0) {
+                option.delay = 1;
+            }
+            if (option.delay < 1) {
+                throw Error("事件响应间隔应当大于0");
+            }
+            option.counter = 0;
             var index = -1;
             for (var i = 0; i < observers.length; i++) {
                 var observer_1 = observers[i];
                 if (observer_1.method === method && observer_1.caller === caller) {
-                    observer_1.args = args;
+                    option.counter = observer_1.option.counter;
+                    observer_1.option = option;
                     var b0 = observer_1.priority === priority;
                     var b1 = observer_1.receiveOnce === receiveOnce;
                     if (b0 === false || b1 === false) {
@@ -280,11 +578,12 @@ var puremvc;
                     index = i;
                 }
             }
+            MutexLocker.create(name, caller);
             var observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
-            observer.args = args;
             observer.name = name;
             observer.caller = caller;
             observer.method = method;
+            observer.option = option;
             observer.priority = priority;
             observer.receiveOnce = receiveOnce;
             if (index < 0) {
@@ -295,12 +594,41 @@ var puremvc;
             }
             return observer;
         };
+        View.prototype.$createOption = function (data) {
+            if (typeof data === "number") {
+                if (data < CareModuleID.NONE) {
+                    return {
+                        delay: data
+                    };
+                }
+                else {
+                    if (data === CareModuleID.CUSTOM) {
+                        return {
+                            careStatMod: suncore.ModuleEnum.CUSTOM
+                        };
+                    }
+                    else if (data === CareModuleID.TIMELINE) {
+                        return {
+                            careStatMod: suncore.ModuleEnum.TIMELINE
+                        };
+                    }
+                }
+            }
+            else if (data instanceof Array) {
+                return {
+                    args: data
+                };
+            }
+            else {
+                return data;
+            }
+        };
         View.prototype.removeObserver = function (name, method, caller) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid observer");
+                throw Error("移除无效的监听");
             }
             if (method === void 0 || method === null) {
-                throw Error("Remove invalid observer method: " + name);
+                throw Error("移除无效的监听回调：" + name);
             }
             if (caller === void 0) {
                 caller = null;
@@ -318,6 +646,7 @@ var puremvc;
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
                     this.$recycle.push(observer);
+                    MutexLocker.release(name, caller);
                     break;
                 }
             }
@@ -326,27 +655,84 @@ var puremvc;
                 delete this.$observers[name];
             }
         };
+        View.prototype.hasObserver = function (name, method, caller) {
+            if (method === void 0) {
+                method = null;
+            }
+            if (caller === void 0) {
+                caller = null;
+            }
+            if (isStringNullOrEmpty(name) === true) {
+                throw Error("查询无效的监听");
+            }
+            if (method === null && caller === null) {
+                throw Error("method和caller不允许同时为空");
+            }
+            var observers = this.$observers[name];
+            if (observers === void 0) {
+                return false;
+            }
+            for (var i = 0; i < observers.length; i++) {
+                var observer = observers[i];
+                if (method === null) {
+                    if (observer.caller === caller) {
+                        return true;
+                    }
+                }
+                else if (caller === null) {
+                    if (observer.method === method) {
+                        return true;
+                    }
+                }
+                else if (observer.method === method && observer.caller === caller) {
+                    return true;
+                }
+            }
+            return false;
+        };
         View.prototype.notifyCancel = function () {
             this.$isCanceled = true;
         };
-        View.prototype.notifyObservers = function (name, args, cancelable) {
+        View.prototype.notifyObservers = function (name, args, cancelable, force) {
             if (cancelable === void 0) { cancelable = true; }
+            if (force === void 0) { force = false; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Notify invalid command");
+                throw Error("派发无效的通知");
             }
             var observers = this.$observers[name];
             if (observers === void 0) {
                 return;
             }
             this.$workings[name] = true;
+            MutexLocker.lock(name);
             var isCanceled = this.$isCanceled;
             this.$isCanceled = false;
             for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
+                var option = observer.option;
+                if (this.$careStatCmds[name] === true && force === false) {
+                    if (option.careStatMod !== void 0 && this.$modStatMap[option.careStatMod] !== true) {
+                        continue;
+                    }
+                }
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
                 }
-                var params = observer.args === null ? args : observer.args.concat(args);
+                if (observer.caller !== null && observer.caller.destroyed === true) {
+                    if (suncom && suncom["Common"]) {
+                        console.warn("\u5BF9\u8C61[" + suncom["Common"].getQualifiedClassName(observer.caller) + "]\u5DF1\u9500\u6BC1\uFF0C\u672A\u80FD\u54CD\u5E94" + name + "\u4E8B\u4EF6\u3002");
+                    }
+                    else {
+                        console.warn("\u5BF9\u8C61\u5DF1\u9500\u6BC1\uFF0C\u672A\u80FD\u54CD\u5E94" + name + "\u4E8B\u4EF6\u3002");
+                    }
+                    continue;
+                }
+                option.counter++;
+                if (option.counter < option.delay) {
+                    continue;
+                }
+                option.counter = 0;
+                var params = option.args ? option.args.concat(args) : args;
                 if (observer.caller === Controller.inst) {
                     observer.method.call(observer.caller, name, params);
                 }
@@ -366,6 +752,7 @@ var puremvc;
             }
             this.$isCanceled = isCanceled;
             this.$workings[name] = false;
+            MutexLocker.unlock(name);
             while (this.$onceObservers.length > 0) {
                 var observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
@@ -374,10 +761,10 @@ var puremvc;
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid mediator");
+                throw Error("注册无效的Mediator");
             }
             if (this.hasMediator(name) === true) {
-                throw Error("Register duplicate mediator: " + name);
+                throw Error("重复注册Mediator " + name);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -385,10 +772,10 @@ var puremvc;
         };
         View.prototype.removeMediator = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid mediator");
+                throw Error("移除无效的Mediator");
             }
             if (this.hasMediator(name) === false) {
-                throw Error("Remove non-existent mediator " + name);
+                throw Error("移除不存在的Mediator " + name);
             }
             var mediator = this.$mediators[name];
             delete this.$mediators[name];
@@ -396,9 +783,15 @@ var puremvc;
             mediator.onRemove();
         };
         View.prototype.retrieveMediator = function (name) {
+            if (MutexLocker.enableMMIAction() === false) {
+                throw Error("\u975EMMI\u6A21\u5757\u7981\u7528\u63A5\u53E3");
+            }
             return this.$mediators[name] || null;
         };
         View.prototype.hasMediator = function (name) {
+            if (MutexLocker.enableMMIAction() === false) {
+                throw Error("\u975EMMI\u6A21\u5757\u7981\u7528\u63A5\u53E3");
+            }
             return this.$mediators[name] !== void 0;
         };
         View.inst = null;
@@ -433,7 +826,7 @@ var puremvc;
             _this.$notificationInterests = [];
             _this.$viewComponent = null;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid mediator name: " + name);
+                throw Error("无效的Mediator名字");
             }
             _this.$mediatorName = name;
             _this.$viewComponent = viewComponent || null;
@@ -450,8 +843,9 @@ var puremvc;
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
         };
-        Mediator.prototype.$handleNotification = function (name, method, priority, args) {
-            var observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
+        Mediator.prototype.$handleNotification = function (name, method, priority, option) {
+            if (priority === void 0) { priority = suncom.EventPriorityEnum.MID; }
+            var observer = this.facade.registerObserver(name, method, this, void 0, priority, option);
             observer && this.$notificationInterests.push(observer);
         };
         Mediator.prototype.onRegister = function () {
@@ -467,6 +861,113 @@ var puremvc;
         return Mediator;
     }(Notifier));
     puremvc.Mediator = Mediator;
+    var MutexLocker;
+    (function (MutexLocker) {
+        MutexLocker.MMI_COMMAND_PREFIX = "MMI";
+        MutexLocker.KERNEL_COMMAND_PREFIX = "sun";
+        MutexLocker.scope = null;
+        MutexLocker.locker = null;
+        MutexLocker.checkPrefix = false;
+        MutexLocker.msgQMap = {};
+        MutexLocker.msgQCmd = {};
+        MutexLocker.mmiMsgQMap = {};
+        function getCommandPrefix(name) {
+            if (name.substr(0, 3) === MutexLocker.KERNEL_COMMAND_PREFIX) {
+                return MutexLocker.KERNEL_COMMAND_PREFIX;
+            }
+            var index = name.indexOf("_");
+            if (index < 1) {
+                throw Error("\u5FC5\u987B\u4E3A\u547D\u4EE4\u6307\u5B9A\u4E00\u4E2A\u6A21\u5757\u540D\uFF0C\u683C\u5F0F\u5982 MOD_" + name);
+            }
+            var prefix = name.substr(0, index);
+            if (MutexLocker.msgQMap[prefix] === void 0) {
+                throw Error("\u672A\u6CE8\u518C\u7684MsgQ\u6D88\u606F\u524D\u7F00\uFF1A" + prefix);
+            }
+            return prefix;
+        }
+        function enableMMIAction() {
+            if (MutexLocker.checkPrefix === false) {
+                return true;
+            }
+            if (MutexLocker.scope.curMsgQMod === suncore.MsgQModEnum.NIL || MutexLocker.scope.curMsgQMod === suncore.MsgQModEnum.KAL || MutexLocker.scope.curMsgQMod === suncore.MsgQModEnum.MMI) {
+                return true;
+            }
+            return MutexLocker.mmiMsgQMap[MutexLocker.scope.curMsgQMod] === true;
+        }
+        MutexLocker.enableMMIAction = enableMMIAction;
+        function active(msgQMod) {
+            if (MutexLocker.checkPrefix === true) {
+                MutexLocker.scope.active(msgQMod);
+            }
+        }
+        MutexLocker.active = active;
+        function deactive() {
+            if (MutexLocker.checkPrefix === true) {
+                MutexLocker.scope.deactive();
+            }
+        }
+        MutexLocker.deactive = deactive;
+        function lock(name) {
+            if (MutexLocker.checkPrefix === false) {
+                return;
+            }
+            var prefix = getCommandPrefix(name);
+            var msgQMod = MutexLocker.msgQMap[prefix];
+            MutexLocker.scope.asserts(msgQMod, null);
+            MutexLocker.scope.lock(msgQMod);
+        }
+        MutexLocker.lock = lock;
+        function unlock(name) {
+            if (MutexLocker.checkPrefix === false) {
+                return;
+            }
+            var prefix = getCommandPrefix(name);
+            var msgQMod = MutexLocker.msgQMap[prefix];
+            MutexLocker.scope.asserts(msgQMod, null);
+            MutexLocker.scope.unlock(msgQMod);
+        }
+        MutexLocker.unlock = unlock;
+        function create(name, target) {
+            if (MutexLocker.checkPrefix === false) {
+                return;
+            }
+            if (target === null || target === puremvc.Controller.inst || target === puremvc.View.inst) {
+                return;
+            }
+            var prefix = getCommandPrefix(name);
+            var msgQMod = MutexLocker.msgQMap[prefix];
+            MutexLocker.locker.update(target);
+            MutexLocker.locker.asserts(msgQMod, target);
+            MutexLocker.locker.lock(msgQMod);
+        }
+        MutexLocker.create = create;
+        function release(name, target) {
+            if (MutexLocker.checkPrefix === false) {
+                return;
+            }
+            if (target === null || target === puremvc.Controller.inst || target === puremvc.View.inst) {
+                return;
+            }
+            var prefix = getCommandPrefix(name);
+            var msgQMod = MutexLocker.msgQMap[prefix];
+            MutexLocker.locker.update(target);
+            MutexLocker.locker.asserts(msgQMod, target);
+            MutexLocker.locker.unlock(msgQMod);
+        }
+        MutexLocker.release = release;
+        function backup(target) {
+            if (MutexLocker.checkPrefix === true) {
+                MutexLocker.scope.backup(target);
+            }
+        }
+        MutexLocker.backup = backup;
+        function restore() {
+            if (MutexLocker.checkPrefix === true) {
+                MutexLocker.scope.restore();
+            }
+        }
+        MutexLocker.restore = restore;
+    })(MutexLocker = puremvc.MutexLocker || (puremvc.MutexLocker = {}));
     function isStringNullOrEmpty(str) {
         return str === void 0 || str === null || str === "";
     }

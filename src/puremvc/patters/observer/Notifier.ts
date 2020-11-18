@@ -5,17 +5,17 @@ module puremvc {
      */
     export class Notifier {
         /**
-         * MsgQÏûÏ¢Ä£¿é±êÊ¶£¬Ä¬ÈÏÎªMMI
+         * MsgQæ¶ˆæ¯æ¨¡å—æ ‡è¯†ï¼Œé»˜è®¤ä¸ºMMI
          */
         private $msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
 
         /**
-         * PureMVCÍâ¹ÛÒıÓÃ
+         * PureMVCå¤–è§‚å¼•ç”¨
          */
         private $facade: Facade = Facade.getInstance();
 
         /**
-         * ÊÇ·ñ¼ºÏú»Ù
+         * æ˜¯å¦å·±é”€æ¯
          * export
          */
         protected $destroyed: boolean = false;
@@ -30,7 +30,7 @@ module puremvc {
         }
 
         /**
-         * Ïú»Ù¶ÔÏó
+         * é”€æ¯å¯¹è±¡
          * export
          */
         destroy(): void {
@@ -38,7 +38,7 @@ module puremvc {
         }
 
         /**
-         * »ñÈ¡PureMVCÍâ¹ÛÒıÓÃ
+         * è·å–PureMVCå¤–è§‚å¼•ç”¨
          * export
          */
         protected get facade(): Facade {
@@ -47,7 +47,7 @@ module puremvc {
         }
 
         /**
-         * »ñÈ¡ÏûÏ¢ÅÉ·¢ÕßMsgQÏûÏ¢Ä£¿é±êÊ¶
+         * è·å–æ¶ˆæ¯æ´¾å‘è€…MsgQæ¶ˆæ¯æ¨¡å—æ ‡è¯†
          * export
          */
         get msgQMod(): suncore.MsgQModEnum {
@@ -55,7 +55,7 @@ module puremvc {
         }
 
         /**
-         * ÊÇ·ñ¼ºÏú»Ù
+         * æ˜¯å¦å·±é”€æ¯
          * export
          */
         get destroyed(): boolean {
