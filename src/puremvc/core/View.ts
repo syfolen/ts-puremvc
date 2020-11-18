@@ -7,6 +7,8 @@ module puremvc {
 
         static inst: View = null;
 
+        private $pool: Observer[] = [];
+
         private $mediators: { [name: string]: Mediator } = {};
 
         private $workings: { [name: string]: boolean } = {};
@@ -14,8 +16,6 @@ module puremvc {
 
         private $isCanceled: boolean = false;
         private $onceObservers: Observer[] = [];
-
-        private $recycle: Observer[] = [];
 
         /**
          * suncore模块状态
@@ -117,7 +117,7 @@ module puremvc {
             }
             MutexLocker.create(name, caller);
 
-            const observer: Observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
+            const observer: Observer = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
             observer.name = name;
             observer.caller = caller;
             observer.method = method;
@@ -188,7 +188,7 @@ module puremvc {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
-                    this.$recycle.push(observer);
+                    this.$pool.push(observer);
                     MutexLocker.release(name, caller);
                     break;
                 }
