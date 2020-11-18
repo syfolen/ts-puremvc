@@ -26,7 +26,7 @@ module puremvc {
 
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: number = 2, args: any[] = null): Observer {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid observer: " + name);
+                throw Error("Register invalid observer");
             }
             if (method === void 0 || method === null) {
                 throw Error("Register invalid observer method: " + name);
@@ -85,7 +85,7 @@ module puremvc {
 
         removeObserver(name: string, method: Function, caller: Object): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid observer: " + name);
+                throw Error("Remove invalid observer");
             }
             if (method === void 0 || method === null) {
                 throw Error("Remove invalid observer method: " + name);
@@ -129,7 +129,7 @@ module puremvc {
          */
         notifyObservers(name: string, args?: any, cancelable: boolean = true): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Notify invalid command: " + name);
+                throw Error("Notify invalid command");
             }
             const observers: Observer[] = this.$observers[name];
             // 无此类事件
@@ -185,7 +185,7 @@ module puremvc {
         registerMediator(mediator: Mediator): void {
             const name: string = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid mediator: " + name);
+                throw Error("Register invalid mediator");
             }
             if (this.hasMediator(name) === true) {
                 throw Error("Register duplicate mediator: " + name);
@@ -197,7 +197,7 @@ module puremvc {
 
         removeMediator(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid mediator: " + name);
+                throw Error("Remove invalid mediator");
             }
             if (this.hasMediator(name) === false) {
                 throw Error("Remove non-existent mediator " + name);

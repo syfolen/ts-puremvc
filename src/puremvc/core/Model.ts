@@ -19,7 +19,7 @@ module puremvc {
         registerProxy(proxy: Proxy): void {
             const name: string = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid proxy: " + name);
+                throw Error("Register invalid proxy");
             }
             if (this.hasProxy(name) === true) {
                 throw Error("Register duplicate proxy: " + name);
@@ -30,7 +30,7 @@ module puremvc {
 
         removeProxy(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid proxy: " + name);
+                throw Error("Remove invalid proxy");
             }
             if (this.hasProxy(name) === false) {
                 throw Error("Remove non-existent proxy: " + name);
