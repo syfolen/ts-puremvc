@@ -7,6 +7,7 @@ module puremvc {
 
         static inst: View = null;
 
+        private $pool: Observer[] = [];
         private $mediators: IDictionary<Mediator> = {};
 
         private $workings: IDictionary<boolean> = {};
@@ -14,8 +15,6 @@ module puremvc {
 
         private $isCanceled: boolean = false;
         private $onceObservers: Observer[] = [];
-
-        private $recycle: Observer[] = [];
 
         constructor() {
             if (View.inst !== null) {
@@ -67,7 +66,7 @@ module puremvc {
                 }
             }
 
-            const observer: Observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
+            const observer: Observer = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
             observer.args = args;
             observer.name = name;
             observer.caller = caller;
@@ -108,7 +107,7 @@ module puremvc {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
-                    this.$recycle.push(observer);
+                    this.$pool.push(observer);
                     break;
                 }
             }
