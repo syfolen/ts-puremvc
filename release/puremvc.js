@@ -230,6 +230,7 @@ var puremvc;
     var View = (function () {
         function View() {
             this.$mediators = {};
+            this.$workings = {};
             this.$observers = {};
             this.$isCanceled = false;
             this.$onceObservers = [];
@@ -254,14 +255,14 @@ var puremvc;
             }
             var observers = this.$observers[name];
             if (observers === void 0) {
-                observers = this.$observers[name] = [false];
+                observers = this.$observers[name] = [];
             }
-            else if (observers[0] === true) {
-                observers = this.$observers[name] = observers.slice();
-                observers[0] = false;
+            else if (this.$workings[name] === true) {
+                this.$workings[name] = false;
+                this.$observers[name] = observers = observers.slice();
             }
             var index = -1;
-            for (var i = 1; i < observers.length; i++) {
+            for (var i = 0; i < observers.length; i++) {
                 var observer_1 = observers[i];
                 if (observer_1.method === method && observer_1.caller === caller) {
                     observer_1.args = args;
@@ -279,7 +280,7 @@ var puremvc;
                     index = i;
                 }
             }
-            var observer = this.$recycle.pop() || new Observer();
+            var observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
             observer.args = args;
             observer.name = name;
             observer.caller = caller;
@@ -308,11 +309,11 @@ var puremvc;
             if (observers === void 0) {
                 return;
             }
-            if (observers[0] === true) {
-                observers = this.$observers[name] = observers.slice();
-                observers[0] = false;
+            if (this.$workings[name] === true) {
+                this.$workings[name] = false;
+                this.$observers[name] = observers = observers.slice();
             }
-            for (var i = 1; i < observers.length; i++) {
+            for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
@@ -320,7 +321,8 @@ var puremvc;
                     break;
                 }
             }
-            if (observers.length === 1) {
+            if (observers.length === 0) {
+                delete this.$workings[name];
                 delete this.$observers[name];
             }
         };
@@ -336,10 +338,10 @@ var puremvc;
             if (observers === void 0) {
                 return;
             }
-            observers[0] = true;
+            this.$workings[name] = true;
             var isCanceled = this.$isCanceled;
             this.$isCanceled = false;
-            for (var i = 1; i < observers.length; i++) {
+            for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
@@ -363,7 +365,7 @@ var puremvc;
                 }
             }
             this.$isCanceled = isCanceled;
-            observers[0] = false;
+            this.$workings[name] = false;
             while (this.$onceObservers.length > 0) {
                 var observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
