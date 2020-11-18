@@ -11,7 +11,7 @@ module puremvc {
 
         constructor() {
             if (Controller.inst !== null) {
-                throw Error("Controller singleton already constructed!");
+                throw Error(`Controller singleton already constructed!`);
             }
             Controller.inst = this;
         }
@@ -28,7 +28,7 @@ module puremvc {
 
         registerCommand(name: string, cls: new () => ICommand, priority: number, args: any[]): void {
             if (this.hasCommand(name) === true) {
-                throw Error("Register duplicate command: " + name);
+                throw Error(`Register duplicate command: ${name}`);
             }
             this.$commands[name] = cls;
             View.inst.registerObserver(name, this.executeCommand, this, false, priority, args);
@@ -36,7 +36,7 @@ module puremvc {
 
         removeCommand(name: string): void {
             if (this.hasCommand(name) === false) {
-                throw Error("Remove non-existent command: " + name);
+                throw Error(`Remove non-existent command: ${name}`);
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);

@@ -38,7 +38,7 @@ module puremvc {
 
         constructor() {
             if (Facade.inst !== null) {
-                throw Error("Facade singleton already constructed!");
+                throw Error(`Facade singleton already constructed!`);
             }
             Facade.inst = this;
             this.$initializeFacade();

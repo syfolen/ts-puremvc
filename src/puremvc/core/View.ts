@@ -19,17 +19,17 @@ module puremvc {
 
         constructor() {
             if (View.inst !== null) {
-                throw Error("View singleton already constructed!");
+                throw Error(`View singleton already constructed!`);
             }
             View.inst = this;
         }
 
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: number = 2, args: any[] = null): Observer {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid observer");
+                throw Error(`Register invalid observer`);
             }
             if (method === void 0 || method === null) {
-                throw Error("Register invalid observer method: " + name);
+                throw Error(`Register invalid observer method: ${name}`);
             }
             if (caller === void 0) {
                 caller = null;
@@ -57,7 +57,7 @@ module puremvc {
                         const s0: string = b0 === true ? "" : "priority:" + priority;
                         const s1: string = b1 === true ? "" : "receiveOnce:" + receiveOnce;
                         const s2: string = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn("重复注册事件，个别参数未更新：" + `${s0}${s2}${s1}`);
+                        console.warn(`重复注册事件，个别参数未更新：${s0}${s2}${s1}`);
                     }
                     return null;
                 }
@@ -85,10 +85,10 @@ module puremvc {
 
         removeObserver(name: string, method: Function, caller: Object): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid observer");
+                throw Error(`Remove invalid observer`);
             }
             if (method === void 0 || method === null) {
-                throw Error("Remove invalid observer method: " + name);
+                throw Error(`Remove invalid observer method: ${name}`);
             }
             if (caller === void 0) {
                 caller = null;
@@ -129,7 +129,7 @@ module puremvc {
          */
         notifyObservers(name: string, args?: any, cancelable: boolean = true): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Notify invalid command");
+                throw Error(`Notify invalid command`);
             }
             const observers: Observer[] = this.$observers[name];
             // 无此类事件
@@ -166,7 +166,7 @@ module puremvc {
                     if (cancelable === true) {
                         break;
                     }
-                    console.error("尝试取消不可被取消的命令：" + name);
+                    console.error(`尝试取消不可被取消的命令：${name}`);
                     this.$isCanceled = false;
                 }
             }
@@ -185,10 +185,10 @@ module puremvc {
         registerMediator(mediator: Mediator): void {
             const name: string = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid mediator");
+                throw Error(`Register invalid mediator`);
             }
             if (this.hasMediator(name) === true) {
-                throw Error("Register duplicate mediator: " + name);
+                throw Error(`Register duplicate mediator: ${name}`);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -197,10 +197,10 @@ module puremvc {
 
         removeMediator(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid mediator");
+                throw Error(`Remove invalid mediator`);
             }
             if (this.hasMediator(name) === false) {
-                throw Error("Remove non-existent mediator " + name);
+                throw Error(`Remove non-existent mediator: ${name}`);
             }
             const mediator: Mediator = this.$mediators[name];
             delete this.$mediators[name];
