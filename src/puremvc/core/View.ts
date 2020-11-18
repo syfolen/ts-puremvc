@@ -6,7 +6,9 @@ module puremvc {
         static inst: View = null;
 
         private $mediators: IDictionary<Mediator> = {};
-        private $observers: IDictionary<Array<boolean | Observer>> = {};
+
+        private $workings: IDictionary<boolean> = {};
+        private $observers: IDictionary<Observer[]> = {};
 
         private $isCanceled: boolean = false;
         private $onceObservers: Observer[] = [];
@@ -33,21 +35,21 @@ module puremvc {
             if (caller === void 0) {
                 caller = null;
             }
-            let observers: Array<boolean | Observer> = this.$observers[name];
+            let observers: Observer[] = this.$observers[name];
             // 若列表不存在，则新建
             if (observers === void 0) {
-                observers = this.$observers[name] = [false];
+                observers = this.$observers[name] = [];
             }
-            // 若当前禁止直接更新，则复制列表
-            else if (observers[0] === true) {
-                observers = this.$observers[name] = observers.slice();
-                // 新生成的列表允许被更新
-                observers[0] = false;
+            // 若列表正在工作，则复制列表
+            else if (this.$workings[name] === true) {
+                // 标记为未在工作
+                this.$workings[name] = false;
+                this.$observers[name] = observers = observers.slice();
             }
 
             let index: number = -1;
-            for (let i: number = 1; i < observers.length; i++) {
-                const observer: Observer = observers[i] as Observer;
+            for (let i: number = 0; i < observers.length; i++) {
+                const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observer.args = args;
                     const b0: boolean = observer.priority === priority;
@@ -92,19 +94,19 @@ module puremvc {
             if (caller === void 0) {
                 caller = null;
             }
-            let observers: Array<boolean | Observer> = this.$observers[name];
+            let observers: Observer[] = this.$observers[name];
             // 无此类事件
             if (observers === void 0) {
                 return;
             }
-            // 若当前禁止直接更新，则复制列表
-            if (observers[0] === true) {
-                observers = this.$observers[name] = observers.slice();
-                // 新生成的列表允许被更新
-                observers[0] = false;
+            // 若列表正在工作，则复制列表
+            if (this.$workings[name] === true) {
+                // 标记为未在工作
+                this.$workings[name] = false;
+                this.$observers[name] = observers = observers.slice();
             }
-            for (let i: number = 1; i < observers.length; i++) {
-                const observer: Observer = observers[i] as Observer;
+            for (let i: number = 0; i < observers.length; i++) {
+                const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
                     this.$recycle.push(observer);
@@ -112,7 +114,8 @@ module puremvc {
                 }
             }
             // 移除空列表
-            if (observers.length === 1) {
+            if (observers.length === 0) {
+                delete this.$workings[name];
                 delete this.$observers[name];
             }
         }
@@ -128,21 +131,21 @@ module puremvc {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Notify invalid command: " + name);
             }
-            const observers: Array<boolean | Observer> = this.$observers[name];
+            const observers: Observer[] = this.$observers[name];
             // 无此类事件
             if (observers === void 0) {
                 return;
             }
-            // 标记禁止更新
-            observers[0] = true;
+            // 标记为正在工作
+            this.$workings[name] = true;
 
             // 记录历史命令状态
             const isCanceled: boolean = this.$isCanceled;
             // 标记当前命令未取消
             this.$isCanceled = false;
 
-            for (let i: number = 1; i < observers.length; i++) {
-                const observer: Observer = observers[i] as Observer;
+            for (let i: number = 0; i < observers.length; i++) {
+                const observer: Observer = observers[i];
                 // 一次性命令入栈
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
@@ -169,8 +172,8 @@ module puremvc {
             }
             // 回归历史命令状态
             this.$isCanceled = isCanceled;
-            // 标记允许直接更新
-            observers[0] = false;
+            // 标记为未在工作
+            this.$workings[name] = false;
 
             // 注销一次性命令
             while (this.$onceObservers.length > 0) {
