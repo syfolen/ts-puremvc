@@ -241,7 +241,7 @@ var puremvc;
         }
         View.prototype.registerObserver = function (name, method, caller, receiveOnce, priority, args) {
             if (receiveOnce === void 0) { receiveOnce = false; }
-            if (priority === void 0) { priority = 1; }
+            if (priority === void 0) { priority = 2; }
             if (args === void 0) { args = null; }
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Register invalid observer: " + name);
@@ -257,7 +257,7 @@ var puremvc;
                 observers = this.$observers[name] = [false];
             }
             else if (observers[0] === true) {
-                observers = this.$observers[name] = observers.concat();
+                observers = this.$observers[name] = observers.slice();
                 observers[0] = false;
             }
             var index = -1;
@@ -309,7 +309,7 @@ var puremvc;
                 return;
             }
             if (observers[0] === true) {
-                observers = this.$observers[name] = observers.concat();
+                observers = this.$observers[name] = observers.slice();
                 observers[0] = false;
             }
             for (var i = 1; i < observers.length; i++) {
@@ -354,8 +354,12 @@ var puremvc;
                 else {
                     observer.method.call(observer.caller, params);
                 }
-                if (this.$isCanceled && cancelable === true) {
-                    break;
+                if (this.$isCanceled) {
+                    if (cancelable === true) {
+                        break;
+                    }
+                    console.error("尝试取消不可被取消的命令：" + name);
+                    this.$isCanceled = false;
                 }
             }
             this.$isCanceled = isCanceled;
