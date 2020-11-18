@@ -38,7 +38,7 @@ module puremvc {
 
         constructor() {
             if (Facade.inst !== null) {
-                throw Error("重复构建PureMVC外观类！！！");
+                throw Error(`重复构建PureMVC外观类！！！`);
             }
             Facade.inst = this;
             this.$initializeFacade();

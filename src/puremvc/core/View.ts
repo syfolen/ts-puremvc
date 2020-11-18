@@ -29,7 +29,7 @@ module puremvc {
 
         constructor() {
             if (View.inst !== null) {
-                throw Error("重复构建视图类！！！");
+                throw Error(`重复构建视图类！！！`);
             }
             View.inst = this;
             this.registerObserver(suncore.NotifyKey.START_TIMELINE, this.$onStartTimeline, this);
@@ -67,10 +67,10 @@ module puremvc {
          */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option: number | CareModuleID | any[] | IOption = 1): Observer {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("注册无效的监听");
+                throw Error(`注册无效的监听`);
             }
             if (method === void 0 || method === null) {
-                throw Error("注册无效的监听回调：" + name);
+                throw Error(`注册无效的监听回调：${name}`);
             }
             if (caller === void 0) {
                 caller = null;
@@ -90,7 +90,7 @@ module puremvc {
             option = this.$createOption(option);
             if (option.delay === void 0) { option.delay = 1; }
             if (option.delay < 1) {
-                throw Error("事件响应间隔应当大于0");
+                throw Error(`事件响应间隔应当大于0`);
             }
             option.counter = 0;
 
@@ -106,7 +106,7 @@ module puremvc {
                         const s0: string = b0 === true ? "" : "priority:" + priority;
                         const s1: string = b1 === true ? "" : "receiveOnce:" + receiveOnce;
                         const s2: string = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn("重复注册事件，个别参数未更新：" + `${s0}${s2}${s1}`);
+                        console.warn(`重复注册事件，个别参数未更新：${s0}${s2}${s1}`);
                     }
                     return null;
                 }
@@ -165,10 +165,10 @@ module puremvc {
 
         removeObserver(name: string, method: Function, caller: Object): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("移除无效的监听");
+                throw Error(`移除无效的监听`);
             }
             if (method === void 0 || method === null) {
-                throw Error("移除无效的监听回调：" + name);
+                throw Error(`移除无效的监听回调：${name}`);
             }
             if (caller === void 0) {
                 caller = null;
@@ -209,10 +209,10 @@ module puremvc {
             if (method === void 0) { method = null; }
             if (caller === void 0) { caller = null; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("查询无效的监听");
+                throw Error(`查询无效的监听`);
             }
             if (method === null && caller === null) {
-                throw Error("method和caller不允许同时为空");
+                throw Error(`method和caller不允许同时为空`);
             }
             let observers: Observer[] = this.$observers[name];
             // 无此类事件
@@ -252,7 +252,7 @@ module puremvc {
          */
         notifyObservers(name: string, args?: any, cancelable: boolean = true, force: boolean = false): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("派发无效的通知");
+                throw Error(`派发无效的通知`);
             }
             const observers: Observer[] = this.$observers[name];
             // 无此类事件
@@ -314,7 +314,7 @@ module puremvc {
                     if (cancelable === true) {
                         break;
                     }
-                    console.error("尝试取消不可被取消的命令：" + name);
+                    console.error(`尝试取消不可被取消的命令：${name}`);
                     this.$isCanceled = false;
                 }
             }
@@ -335,10 +335,10 @@ module puremvc {
         registerMediator(mediator: Mediator): void {
             const name: string = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("注册无效的Mediator");
+                throw Error(`注册无效的Mediator`);
             }
             if (this.hasMediator(name) === true) {
-                throw Error("重复注册Mediator " + name);
+                throw Error(`重复注册Mediator${name}`);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -347,10 +347,10 @@ module puremvc {
 
         removeMediator(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("移除无效的Mediator");
+                throw Error(`移除无效的Mediator`);
             }
             if (this.hasMediator(name) === false) {
-                throw Error("移除不存在的Mediator " + name);
+                throw Error(`移除不存在的Mediator${name}`);
             }
             const mediator: Mediator = this.$mediators[name];
             delete this.$mediators[name];

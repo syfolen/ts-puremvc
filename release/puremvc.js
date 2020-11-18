@@ -23,7 +23,7 @@ var puremvc;
         function Controller() {
             this.$commands = {};
             if (Controller.inst !== null) {
-                throw Error("重复构建控制类！！！");
+                throw Error("\u91CD\u590D\u6784\u5EFA\u63A7\u5236\u7C7B\uFF01\uFF01\uFF01");
             }
             Controller.inst = this;
         }
@@ -38,14 +38,14 @@ var puremvc;
         };
         Controller.prototype.registerCommand = function (name, cls, priority, option) {
             if (this.hasCommand(name) === true) {
-                throw Error("重复注册命令：" + name);
+                throw Error("\u91CD\u590D\u6CE8\u518C\u547D\u4EE4\uFF1A" + name);
             }
             this.$commands[name] = cls;
             View.inst.registerObserver(name, this.executeCommand, this, false, priority, option);
         };
         Controller.prototype.removeCommand = function (name) {
             if (this.hasCommand(name) === false) {
-                throw Error("移除不存在的命令：" + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684\u547D\u4EE4\uFF1A" + name);
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
@@ -66,7 +66,7 @@ var puremvc;
             this.$model = new Model();
             this.$controller = new Controller();
             if (Facade.inst !== null) {
-                throw Error("重复构建PureMVC外观类！！！");
+                throw Error("\u91CD\u590D\u6784\u5EFAPureMVC\u5916\u89C2\u7C7B\uFF01\uFF01\uFF01");
             }
             Facade.inst = this;
             this.$initializeFacade();
@@ -191,27 +191,27 @@ var puremvc;
         function Model() {
             this.$proxies = {};
             if (Model.inst !== null) {
-                throw Error("重复构建模型类！！！");
+                throw Error("\u91CD\u590D\u6784\u5EFA\u6A21\u578B\u7C7B\uFF01\uFF01\uFF01");
             }
             Model.inst = this;
         }
         Model.prototype.registerProxy = function (proxy) {
             var name = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("注册无效的Proxy");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684Proxy");
             }
             if (this.hasProxy(name) === true) {
-                throw Error("重复注册Proxy：" + name);
+                throw Error("\u91CD\u590D\u6CE8\u518CProxy\uFF1A" + name);
             }
             this.$proxies[name] = proxy;
             proxy.onRegister();
         };
         Model.prototype.removeProxy = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("移除无效的Proxy");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684Proxy");
             }
             if (this.hasProxy(name) === false) {
-                throw Error("移除不存在的Proxy：" + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684Proxy\uFF1A" + name);
             }
             var proxy = this.$proxies[name];
             delete this.$proxies[name];
@@ -468,7 +468,7 @@ var puremvc;
             _this.$proxyName = null;
             _this.$data = void 0;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("无效的Proxy名字");
+                throw Error("\u65E0\u6548\u7684Proxy\u540D\u5B57");
             }
             _this.$data = data;
             _this.$proxyName = name;
@@ -509,7 +509,7 @@ var puremvc;
             this.$modStatMap = {};
             this.$careStatCmds = {};
             if (View.inst !== null) {
-                throw Error("重复构建视图类！！！");
+                throw Error("\u91CD\u590D\u6784\u5EFA\u89C6\u56FE\u7C7B\uFF01\uFF01\uFF01");
             }
             View.inst = this;
             this.registerObserver(suncore.NotifyKey.START_TIMELINE, this.$onStartTimeline, this);
@@ -534,10 +534,10 @@ var puremvc;
             if (priority === void 0) { priority = suncom.EventPriorityEnum.MID; }
             if (option === void 0) { option = 1; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("注册无效的监听");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u76D1\u542C");
             }
             if (method === void 0 || method === null) {
-                throw Error("注册无效的监听回调：" + name);
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u76D1\u542C\u56DE\u8C03\uFF1A" + name);
             }
             if (caller === void 0) {
                 caller = null;
@@ -555,7 +555,7 @@ var puremvc;
                 option.delay = 1;
             }
             if (option.delay < 1) {
-                throw Error("事件响应间隔应当大于0");
+                throw Error("\u4E8B\u4EF6\u54CD\u5E94\u95F4\u9694\u5E94\u5F53\u5927\u4E8E0");
             }
             option.counter = 0;
             var index = -1;
@@ -570,7 +570,7 @@ var puremvc;
                         var s0 = b0 === true ? "" : "priority:" + priority;
                         var s1 = b1 === true ? "" : "receiveOnce:" + receiveOnce;
                         var s2 = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn("重复注册事件，个别参数未更新：" + ("" + s0 + s2 + s1));
+                        console.warn("\u91CD\u590D\u6CE8\u518C\u4E8B\u4EF6\uFF0C\u4E2A\u522B\u53C2\u6570\u672A\u66F4\u65B0\uFF1A" + s0 + s2 + s1);
                     }
                     return null;
                 }
@@ -625,10 +625,10 @@ var puremvc;
         };
         View.prototype.removeObserver = function (name, method, caller) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("移除无效的监听");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u76D1\u542C");
             }
             if (method === void 0 || method === null) {
-                throw Error("移除无效的监听回调：" + name);
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u76D1\u542C\u56DE\u8C03\uFF1A" + name);
             }
             if (caller === void 0) {
                 caller = null;
@@ -663,10 +663,10 @@ var puremvc;
                 caller = null;
             }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("查询无效的监听");
+                throw Error("\u67E5\u8BE2\u65E0\u6548\u7684\u76D1\u542C");
             }
             if (method === null && caller === null) {
-                throw Error("method和caller不允许同时为空");
+                throw Error("method\u548Ccaller\u4E0D\u5141\u8BB8\u540C\u65F6\u4E3A\u7A7A");
             }
             var observers = this.$observers[name];
             if (observers === void 0) {
@@ -697,7 +697,7 @@ var puremvc;
             if (cancelable === void 0) { cancelable = true; }
             if (force === void 0) { force = false; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("派发无效的通知");
+                throw Error("\u6D3E\u53D1\u65E0\u6548\u7684\u901A\u77E5");
             }
             var observers = this.$observers[name];
             if (observers === void 0) {
@@ -746,7 +746,7 @@ var puremvc;
                     if (cancelable === true) {
                         break;
                     }
-                    console.error("尝试取消不可被取消的命令：" + name);
+                    console.error("\u5C1D\u8BD5\u53D6\u6D88\u4E0D\u53EF\u88AB\u53D6\u6D88\u7684\u547D\u4EE4\uFF1A" + name);
                     this.$isCanceled = false;
                 }
             }
@@ -761,10 +761,10 @@ var puremvc;
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("注册无效的Mediator");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684Mediator");
             }
             if (this.hasMediator(name) === true) {
-                throw Error("重复注册Mediator " + name);
+                throw Error("\u91CD\u590D\u6CE8\u518CMediator" + name);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -772,10 +772,10 @@ var puremvc;
         };
         View.prototype.removeMediator = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("移除无效的Mediator");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684Mediator");
             }
             if (this.hasMediator(name) === false) {
-                throw Error("移除不存在的Mediator " + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684Mediator" + name);
             }
             var mediator = this.$mediators[name];
             delete this.$mediators[name];
@@ -826,7 +826,7 @@ var puremvc;
             _this.$notificationInterests = [];
             _this.$viewComponent = null;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("无效的Mediator名字");
+                throw Error("\u65E0\u6548\u7684Mediator\u540D\u5B57");
             }
             _this.$mediatorName = name;
             _this.$viewComponent = viewComponent || null;

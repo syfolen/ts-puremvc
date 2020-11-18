@@ -20,7 +20,7 @@ module puremvc {
         constructor(name: string, viewComponent?: any) {
             super();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("无效的Mediator名字");
+                throw Error(`无效的Mediator名字`);
             }
             this.$mediatorName = name;
             this.$viewComponent = viewComponent || null;

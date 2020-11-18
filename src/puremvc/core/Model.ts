@@ -11,7 +11,7 @@ module puremvc {
 
         constructor() {
             if (Model.inst !== null) {
-                throw Error("重复构建模型类！！！");
+                throw Error(`重复构建模型类！！！`);
             }
             Model.inst = this;
         }
@@ -19,10 +19,10 @@ module puremvc {
         registerProxy(proxy: Proxy): void {
             const name: string = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("注册无效的Proxy");
+                throw Error(`注册无效的Proxy`);
             }
             if (this.hasProxy(name) === true) {
-                throw Error("重复注册Proxy：" + name);
+                throw Error(`重复注册Proxy：${name}`);
             }
             this.$proxies[name] = proxy;
             proxy.onRegister();
@@ -30,10 +30,10 @@ module puremvc {
 
         removeProxy(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("移除无效的Proxy");
+                throw Error(`移除无效的Proxy`);
             }
             if (this.hasProxy(name) === false) {
-                throw Error("移除不存在的Proxy：" + name);
+                throw Error(`移除不存在的Proxy：${name}`);
             }
             const proxy: Proxy = this.$proxies[name];
             delete this.$proxies[name];

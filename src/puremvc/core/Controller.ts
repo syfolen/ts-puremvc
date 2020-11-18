@@ -11,7 +11,7 @@ module puremvc {
 
         constructor() {
             if (Controller.inst !== null) {
-                throw Error("重复构建控制类！！！");
+                throw Error(`重复构建控制类！！！`);
             }
             Controller.inst = this;
         }
@@ -28,7 +28,7 @@ module puremvc {
 
         registerCommand(name: string, cls: new () => ICommand, priority: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
             if (this.hasCommand(name) === true) {
-                throw Error("重复注册命令：" + name);
+                throw Error(`重复注册命令：${name}`);
             }
             this.$commands[name] = cls;
             View.inst.registerObserver(name, this.executeCommand, this, false, priority, option);
@@ -36,7 +36,7 @@ module puremvc {
 
         removeCommand(name: string): void {
             if (this.hasCommand(name) === false) {
-                throw Error("移除不存在的命令：" + name);
+                throw Error(`移除不存在的命令：${name}`);
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
