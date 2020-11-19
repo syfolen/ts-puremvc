@@ -266,6 +266,7 @@ module test {
     export class TestMutex {
 
         constructor() {
+            console.log("test mutex");
             new NslObject();
             new GuiObject();
             new CuiObject();

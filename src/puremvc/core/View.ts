@@ -8,13 +8,13 @@ module puremvc {
         static inst: View = null;
 
         private $pool: Observer[] = [];
-        private $mediators: { [name: string]: Mediator } = {};
-
-        private $workings: { [name: string]: boolean } = {};
+        private $lockers: { [name: string]: boolean } = {};
         private $observers: { [name: string]: Observer[] } = {};
 
         private $isCanceled: boolean = false;
         private $onceObservers: Observer[] = [];
+
+        private $mediators: { [name: string]: Mediator } = {};
 
         /**
          * suncore模块状态
@@ -58,8 +58,8 @@ module puremvc {
         /**
          * @receiveOnce: 是否只响应一次，默认为：false
          * @priority: 优先级，优先响应级别高的消息，值越大，级别越高，默认为：suncom.EventPriorityEnum.MID
-         * @option: 可选参数
-         * 1. 为number时表示回调函数的响应间隔延时，最小为：1，默认为：1
+         * @option: 可选参数，默认为：1
+         * 1. 为number时表示回调函数的响应间隔延时，最小为：1
          * 2. 为CareModuleID时表示消息所关心的系统模块
          * 3. 为数组时代表执行回调函数时的默认参数
          * export
@@ -79,15 +79,16 @@ module puremvc {
             if (observers === void 0) {
                 observers = this.$observers[name] = [];
             }
-            // 若列表正在工作，则复制列表
-            else if (this.$workings[name] === true) {
-                // 标记为未在工作
-                this.$workings[name] = false;
+            // 解锁并复制被锁定的列表
+            else if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
 
             option = this.$createOption(option);
-            if (option.delay === void 0) { option.delay = 1; }
+            if (option.delay === void 0) {
+                option.delay = 1;
+            }
             if (option.delay < 1) {
                 throw Error(`事件响应间隔应当大于0`);
             }
@@ -177,12 +178,12 @@ module puremvc {
             if (observers === void 0) {
                 return;
             }
-            // 若列表正在工作，则复制列表
-            if (this.$workings[name] === true) {
-                // 标记为未在工作
-                this.$workings[name] = false;
+            // 解锁并复制被锁定的列表
+            if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
+
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
@@ -192,9 +193,10 @@ module puremvc {
                     break;
                 }
             }
+
             // 移除空列表
             if (observers.length === 0) {
-                delete this.$workings[name];
+                delete this.$lockers[name];
                 delete this.$observers[name];
             }
         }
@@ -258,8 +260,8 @@ module puremvc {
             if (observers === void 0) {
                 return;
             }
-            // 标记为正在工作
-            this.$workings[name] = true;
+            // 锁定列表
+            this.$lockers[name] = true;
             // 锁定模块
             MutexLocker.lock(name);
 
@@ -291,11 +293,13 @@ module puremvc {
                     continue;
                 }
 
-                option.counter++;
-                if (option.counter < option.delay) {
-                    continue;
+                if (option.delay > 1) {
+                    option.counter++;
+                    if (option.counter < option.delay) {
+                        continue;
+                    }
+                    option.counter = 0;
                 }
-                option.counter = 0;
 
                 const params: any = option.args ? option.args.concat(args) : args;
                 if (observer.caller === Controller.inst) {
@@ -319,8 +323,8 @@ module puremvc {
             }
             // 回归历史命令状态
             this.$isCanceled = isCanceled;
-            // 标记为未在工作
-            this.$workings[name] = false;
+            // 解锁
+            this.$lockers[name] = false;
             // 释放模块
             MutexLocker.unlock(name);
 
@@ -334,10 +338,10 @@ module puremvc {
         registerMediator(mediator: Mediator): void {
             const name: string = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error(`注册无效的Mediator`);
+                throw Error(`注册无效的中介者对象`);
             }
             if (this.hasMediator(name) === true) {
-                throw Error(`重复注册Mediator${name}`);
+                throw Error(`重复注册中介者对象${name}`);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -346,10 +350,10 @@ module puremvc {
 
         removeMediator(name: string): void {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error(`移除无效的Mediator`);
+                throw Error(`移除无效的中介者对象`);
             }
             if (this.hasMediator(name) === false) {
-                throw Error(`移除不存在的Mediator${name}`);
+                throw Error(`移除不存在的中介者对象${name}`);
             }
             const mediator: Mediator = this.$mediators[name];
             delete this.$mediators[name];

@@ -1,6 +1,5 @@
 
 module puremvc {
-
     /**
      * 判断字符串是否为空
      */

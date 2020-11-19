@@ -12,7 +12,7 @@ module puremvc {
         careStatMod?: suncore.ModuleEnum;
 
         /**
-         * 消息响应间隔，最小为：1，默认为：1
+         * 消息响应间隔，最小为：1
          * export
          */
         delay?: number;

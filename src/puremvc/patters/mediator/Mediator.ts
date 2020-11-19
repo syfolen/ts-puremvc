@@ -20,7 +20,7 @@ module puremvc {
         constructor(name: string, viewComponent?: any) {
             super();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error(`无效的Mediator名字`);
+                throw Error(`无效的中介者对象名字`);
             }
             this.$mediatorName = name;
             this.$viewComponent = viewComponent || null;
@@ -47,8 +47,8 @@ module puremvc {
         /**
          * 注册事件回调
          * @priority: 优先级，优先响应级别高的消息，值越大，级别越高，默认为：suncom.EventPriorityEnum.MID
-         * @option: 可选参数
-         * 1. 为number时表示回调函数的响应间隔延时，最小为：1，默认为：1
+         * @option: 可选参数，默认为：1
+         * 1. 为number时表示回调函数的响应间隔延时，最小为：1
          * 2. 为CareModuleID时表示消息所关心的系统模块
          * 3. 为数组时代表执行回调函数时的默认参数
          * export
