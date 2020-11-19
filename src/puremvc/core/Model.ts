@@ -7,6 +7,9 @@ module puremvc {
 
         static inst: Model = null;
 
+        /**
+         * 模型集合
+         */
         private $proxies: { [name: string]: Proxy } = {};
 
         constructor() {

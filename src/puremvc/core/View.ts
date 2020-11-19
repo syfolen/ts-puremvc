@@ -7,14 +7,32 @@ module puremvc {
 
         static inst: View = null;
 
+        /**
+         * 观察者对象对象池
+         */
         private $pool: Observer[] = [];
+        /**
+         * 命令锁集合，用于防止注册与注销行为对正在响应的观察者列表产生干扰
+         */
         private $lockers: { [name: string]: boolean } = {};
+        /**
+         * 观察者对象集合
+         */
         private $observers: { [name: string]: Observer[] } = {};
 
+        /**
+         * 通知是否己取消
+         */
         private $isCanceled: boolean = false;
+        /**
+         * 己响应的一次性观察者列表
+         */
         private $onceObservers: Observer[] = [];
 
-        private $mediators: { [name: string]: Mediator } = {};
+        /**
+         * 视图中介者对象集合
+         */
+        private $mediators: { [name: string]: Mediator<any> } = {};
 
         constructor() {
             if (View.inst !== null) {
@@ -48,18 +66,9 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    observer.args = args;
-                    const b0: boolean = observer.priority === priority;
-                    const b1: boolean = observer.receiveOnce === receiveOnce;
-                    if (b0 === false || b1 === false) {
-                        const s0: string = b0 === true ? "" : "priority:" + priority;
-                        const s1: string = b1 === true ? "" : "receiveOnce:" + receiveOnce;
-                        const s2: string = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn(`重复注册事件，个别参数未更新：${s0}${s2}${s1}`);
-                    }
                     return null;
                 }
-                // 优先级高的命令先执行
+                // 优先级高的通知先执行
                 if (index === -1 && observer.priority < priority) {
                     index = i;
                 }
@@ -92,7 +101,6 @@ module puremvc {
                 caller = null;
             }
             let observers: Observer[] = this.$observers[name];
-            // 无此类事件
             if (observers === void 0) {
                 return;
             }
@@ -118,69 +126,65 @@ module puremvc {
             }
         }
 
-        notifyCancel(): void {
-            this.$isCanceled = true;
-        }
-
-        /**
-         * @cancelable: 事件是否允许被取消，默认为: true
-         */
-        notifyObservers(name: string, args?: any, cancelable: boolean = true): void {
+        notifyObservers(name: string, data?: any, cancelable: boolean = true): void {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Notify invalid command`);
             }
             const observers: Observer[] = this.$observers[name];
-            // 无此类事件
             if (observers === void 0) {
                 return;
             }
             // 锁定列表
             this.$lockers[name] = true;
 
-            // 记录历史命令状态
+            // 记录历史通知状态
             const isCanceled: boolean = this.$isCanceled;
-            // 标记当前命令未取消
+            // 标记通知未取消
             this.$isCanceled = false;
 
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
-                // 一次性命令入栈
+                // 一次性观察者入栈
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
                 }
-                const params: any = observer.args === null ? args : observer.args.concat(args);
+                const args: any = observer.args === null ? data : observer.args.concat(data);
                 if (observer.caller === Controller.inst) {
-                    observer.method.call(observer.caller, name, params);
+                    observer.method.call(observer.caller, name, args);
                 }
-                else if (params instanceof Array) {
-                    observer.method.apply(observer.caller, params);
+                else if (args instanceof Array) {
+                    observer.method.apply(observer.caller, args);
                 }
                 else {
-                    observer.method.call(observer.caller, params);
+                    observer.method.call(observer.caller, args);
                 }
-                // 命令被取消
+                // 通知被取消
                 if (this.$isCanceled) {
-                    // 命令允许被取消
+                    // 通知允许被取消
                     if (cancelable === true) {
                         break;
                     }
-                    console.error(`尝试取消不可被取消的命令：${name}`);
+                    console.error(`尝试取消不可被取消的通知：${name}`);
                     this.$isCanceled = false;
                 }
             }
-            // 回归历史命令状态
+            // 回归历史通知状态
             this.$isCanceled = isCanceled;
             // 解锁
             this.$lockers[name] = false;
 
-            // 注销一次性命令
+            // 注销一次性观察者
             while (this.$onceObservers.length > 0) {
                 const observer: Observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
             }
         }
 
-        registerMediator(mediator: Mediator): void {
+        notifyCancel(): void {
+            this.$isCanceled = true;
+        }
+
+        registerMediator(mediator: Mediator<any>): void {
             const name: string = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Register invalid mediator`);
@@ -200,13 +204,13 @@ module puremvc {
             if (this.hasMediator(name) === false) {
                 throw Error(`Remove non-existent mediator: ${name}`);
             }
-            const mediator: Mediator = this.$mediators[name];
+            const mediator: Mediator<any> = this.$mediators[name];
             delete this.$mediators[name];
             mediator.removeNotificationInterests();
             mediator.onRemove();
         }
 
-        retrieveMediator(name: string): Mediator {
+        retrieveMediator(name: string): Mediator<any> {
             return this.$mediators[name] || null;
         }
 

@@ -1,6 +1,9 @@
 
 module puremvc {
-
+    /**
+     * 观察者对象
+     * export
+     */
     export class Observer {
 
         args: any[] = null;

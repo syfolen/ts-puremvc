@@ -1,23 +1,32 @@
 
 module puremvc {
     /**
+     * 视图中介者
      * export
      */
-    export class Mediator extends Notifier {
-
+    export class Mediator<T> extends Notifier {
+        /**
+         * 实例名字
+         * export
+         */
         private $mediatorName: string = null;
+
+        /**
+         * 视图感兴趣的通知列表
+         * export
+         */
         private $notificationInterests: Observer[] = [];
 
         /**
-         * 未初始化时值为：null
+         * 视图组件实例，未初始化时值为：null
          * export
          */
-        protected $viewComponent: any = null;
+        protected $viewComponent: T = null;
 
         /**
          * export
          */
-        constructor(name: string, viewComponent?: any) {
+        constructor(name: string, viewComponent?: T) {
             super();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Invalid mediator name`);
@@ -26,16 +35,25 @@ module puremvc {
             this.$viewComponent = viewComponent || null;
         }
 
+        /**
+         * 获取实例名字
+         * export
+         */
         getMediatorName(): string {
             return this.$mediatorName;
         }
 
+        /**
+         * 列举感兴趣的通知
+         * export
+         */
         listNotificationInterests(): void {
 
         }
 
         /**
-         * 移除感兴趣的事件列表（内置方法，请勿调用）
+         * 移除感兴趣的通知列表（内置方法，请勿调用）
+         * export
          */
         removeNotificationInterests(): void {
             for (let i: number = 0; i < this.$notificationInterests.length; i++) {
@@ -45,6 +63,7 @@ module puremvc {
         }
 
         /**
+         * 指定通知处理函数，接口说明请参考: Facade.registerObserver
          * export
          */
         protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
@@ -69,16 +88,18 @@ module puremvc {
         }
 
         /**
+         * 获取视图组件实例
          * export
          */
-        getViewComponent(): any {
+        getViewComponent(): T {
             return this.$viewComponent;
         }
 
         /**
+         * 指定视图组件实例
          * export
          */
-        setViewComponent(view: any): void {
+        setViewComponent(view: T): void {
             this.$viewComponent = view || null;
         }
     }

@@ -13,6 +13,7 @@ module test {
 
             const mediator = puremvc.Facade.getInstance().retrieveMediator(CUIMediator.NAME) as CUIMediator;
             console.assert(mediator !== null, "CUIMediator 获取失败");
+            const view = mediator.getViewComponent();
 
             const data: IData = { msg: 0 };
             puremvc.Facade.getInstance().sendNotification("CUI_TEST", [data, 1]);
@@ -28,7 +29,7 @@ module test {
         }
     }
 
-    class CUIMediator extends puremvc.Mediator {
+    class CUIMediator extends puremvc.Mediator<Laya.Box> {
 
         static readonly NAME: string = "CUIMediator";
 

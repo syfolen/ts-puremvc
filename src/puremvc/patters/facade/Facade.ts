@@ -14,15 +14,18 @@
  */
 module puremvc {
     /**
+     * PureMVC外观类
      * export
      */
     export class Facade {
         /**
+         * 单例
          * export
          */
         static inst: Facade = null;
 
         /**
+         * 获取单例对象
          * export
          */
         static getInstance(): Facade {
@@ -46,11 +49,12 @@ module puremvc {
 
         private $initializeFacade(): void {
             this.$initializeModel();
-            this.$initializeView();
             this.$initializeController();
+            this.$initializeView();
         }
 
         /**
+         * 初始化模型类（优先于控制类）
          * export
          */
         protected $initializeModel(): void {
@@ -58,6 +62,7 @@ module puremvc {
         }
 
         /**
+         * 初始化视图类
          * export
          */
         protected $initializeView(): void {
@@ -65,6 +70,7 @@ module puremvc {
         }
 
         /**
+         * 初始化控制类（优先于视图类）
          * export
          */
         protected $initializeController(): void {
@@ -72,14 +78,19 @@ module puremvc {
         }
 
         /**
-         * @priority: 优先级，值高的先响应，默认为: 2
-         * export
+         * 注册监听
+         * @receiveOnce: 是否为一次性监听，默认为: false
+         * @priority: 响应优先级，值越大，优先级越高，默认为: 2
+         * @args[]: 回调参数列表，默认为: null
+         * 说明：
+         * 1. 若需覆盖参数，请先调用removeObserver移除监听后再重新注册
          */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: number, args?: any[]): void {
             this.$view.registerObserver(name, method, caller, receiveOnce, priority, args);
         }
 
         /**
+         * 移除监听
          * export
          */
         removeObserver(name: string, method: Function, caller: Object): void {
@@ -87,6 +98,11 @@ module puremvc {
         }
 
         /**
+         * 注册命令
+         * @cls: 命令被响应时，会构建cls实例并执行其execute方法
+         * @其余参数请参考registerObserver接口
+         * 说明：
+         * 1. 命令不可重复注册
          * export
          */
         registerCommand(name: string, cls: new () => ICommand, priority?: number, args?: any[]): void {
@@ -94,6 +110,7 @@ module puremvc {
         }
 
         /**
+         * 移除命令
          * export
          */
         removeCommand(name: string): void {
@@ -101,6 +118,7 @@ module puremvc {
         }
 
         /**
+         * 查询是否存在命令
          * export
          */
         hasCommand(name: string): boolean {
@@ -108,13 +126,17 @@ module puremvc {
         }
 
         /**
+         * 注册数据代理类实例
+         * 说明：
+         * 1. 同一类型的实例不可重复注册
          * export
          */
-        registerProxy(proxy: Proxy): void {
+        registerProxy(proxy: Proxy<any>): void {
             this.$model.registerProxy(proxy);
         }
 
         /**
+         * 移除数据代理类实例
          * export
          */
         removeProxy(name: string): void {
@@ -122,13 +144,17 @@ module puremvc {
         }
 
         /**
+         * 获取数据代理类实例
+         * 说明：
+         * 1. 若实例不存在，则会返回: null
          * export
          */
-        retrieveProxy(name: string): Proxy {
+        retrieveProxy(name: string): Proxy<any> {
             return this.$model.retrieveProxy(name);
         }
 
         /**
+         * 查询是否存在数据代理类实例
          * export
          */
         hasProxy(name: string): boolean {
@@ -136,13 +162,17 @@ module puremvc {
         }
 
         /**
+         * 注册视图中介者实例
+         * 说明：
+         * 1. 同一类型的实例不可重复注册
          * export
          */
-        registerMediator(mediator: Mediator): void {
+        registerMediator(mediator: Mediator<any>): void {
             this.$view.registerMediator(mediator);
         }
 
         /**
+         * 移除视图中介者实例
          * export
          */
         removeMediator(name: string): void {
@@ -150,13 +180,17 @@ module puremvc {
         }
 
         /**
+         * 获取视图中介者实例
+         * 说明：
+         * 1. 若实例不存在，则会返回: null
          * export
          */
-        retrieveMediator(name: string): Mediator {
+        retrieveMediator(name: string): Mediator<any> {
             return this.$view.retrieveMediator(name);
         }
 
         /**
+         * 查询是否存在视图中介者实例
          * export
          */
         hasMediator(name: string): boolean {
@@ -164,13 +198,18 @@ module puremvc {
         }
 
         /**
-         * export
+         * 派发通知
+         * @data: 参数对象，允许为任意类型的数据，传递多个参数时可指定其为数组，若需要传递的data本身就是数组，则需要传递[data]
+         * @cancelable: 通知是否允许被取消，默认为: true
          */
-        sendNotification(name: string, args?: any, cancelable?: boolean): void {
-            this.$view.notifyObservers(name, args, cancelable);
+        sendNotification(name: string, data?: any, cancelable?: boolean): void {
+            this.$view.notifyObservers(name, data, cancelable);
         }
 
         /**
+         * 通知取消
+         * 说明：
+         * 1. 未响应的回调都将不再执行
          * export
          */
         notifyCancel(): void {

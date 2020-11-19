@@ -45,11 +45,12 @@ module test {
         }
     }
 
-    class CUIMediator extends puremvc.Mediator {
+    class CUIMediator extends puremvc.Mediator<Laya.View> {
 
         static readonly NAME: string = "CUIMediator";
 
         onRegister(): void {
+            this.$viewComponent = new Laya.View();
             TestView.count++;
         }
 

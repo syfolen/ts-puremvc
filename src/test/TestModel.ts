@@ -13,6 +13,7 @@ module test {
 
             const proxy = puremvc.Facade.getInstance().retrieveProxy(CUIProxy.NAME) as CUIProxy;
             console.assert(proxy !== null, "CUIProxy 获取失败");
+            const data = proxy.getData();
 
             puremvc.Facade.getInstance().removeProxy(CUIProxy.NAME);
             console.assert(puremvc.Facade.getInstance().hasProxy(CUIProxy.NAME) === false, "CUIProxy 未移除");
@@ -20,7 +21,7 @@ module test {
         }
     }
 
-    class CUIProxy extends puremvc.Proxy {
+    class CUIProxy extends puremvc.Proxy<number> {
 
         static readonly NAME: string = "CUIProxy";
 
