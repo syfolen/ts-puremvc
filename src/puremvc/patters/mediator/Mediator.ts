@@ -20,7 +20,7 @@ module puremvc {
         constructor(name: string, viewComponent?: any) {
             super();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error(`Invalid mediator name: ${name}`);
+                throw Error(`Invalid mediator name`);
             }
             this.$mediatorName = name;
             this.$viewComponent = viewComponent || null;

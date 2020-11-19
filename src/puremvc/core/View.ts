@@ -101,6 +101,7 @@ module puremvc {
                 this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
+
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {

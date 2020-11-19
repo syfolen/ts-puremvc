@@ -197,7 +197,7 @@ var puremvc;
             _this.$proxyName = null;
             _this.$data = void 0;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid proxy name: " + name);
+                throw Error("Invalid proxy name");
             }
             _this.$data = data;
             _this.$proxyName = name;
@@ -229,12 +229,12 @@ var puremvc;
     puremvc.SimpleCommand = SimpleCommand;
     var View = (function () {
         function View() {
-            this.$mediators = {};
-            this.$workings = {};
+            this.$pool = [];
+            this.$lockers = {};
             this.$observers = {};
             this.$isCanceled = false;
             this.$onceObservers = [];
-            this.$recycle = [];
+            this.$mediators = {};
             if (View.inst !== null) {
                 throw Error("View singleton already constructed!");
             }
@@ -257,8 +257,8 @@ var puremvc;
             if (observers === void 0) {
                 observers = this.$observers[name] = [];
             }
-            else if (this.$workings[name] === true) {
-                this.$workings[name] = false;
+            else if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
             var index = -1;
@@ -280,7 +280,7 @@ var puremvc;
                     index = i;
                 }
             }
-            var observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
+            var observer = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
             observer.args = args;
             observer.name = name;
             observer.caller = caller;
@@ -309,20 +309,20 @@ var puremvc;
             if (observers === void 0) {
                 return;
             }
-            if (this.$workings[name] === true) {
-                this.$workings[name] = false;
+            if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
             for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
-                    this.$recycle.push(observer);
+                    this.$pool.push(observer);
                     break;
                 }
             }
             if (observers.length === 0) {
-                delete this.$workings[name];
+                delete this.$lockers[name];
                 delete this.$observers[name];
             }
         };
@@ -338,7 +338,7 @@ var puremvc;
             if (observers === void 0) {
                 return;
             }
-            this.$workings[name] = true;
+            this.$lockers[name] = true;
             var isCanceled = this.$isCanceled;
             this.$isCanceled = false;
             for (var i = 0; i < observers.length; i++) {
@@ -365,7 +365,7 @@ var puremvc;
                 }
             }
             this.$isCanceled = isCanceled;
-            this.$workings[name] = false;
+            this.$lockers[name] = false;
             while (this.$onceObservers.length > 0) {
                 var observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
@@ -433,7 +433,7 @@ var puremvc;
             _this.$notificationInterests = [];
             _this.$viewComponent = null;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid mediator name: " + name);
+                throw Error("Invalid mediator name");
             }
             _this.$mediatorName = name;
             _this.$viewComponent = viewComponent || null;
