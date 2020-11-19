@@ -6,7 +6,7 @@ module puremvc {
      */
     export class Proxy<T> extends Notifier {
         /**
-         * 代理名字
+         * 代理名字（内置属性，请勿操作）
          * export
          */
         private $proxyName: string = null;

@@ -10,7 +10,7 @@ module puremvc {
         /**
          * 模型集合
          */
-        private $proxies: { [name: string]: Proxy } = {};
+        private $proxies: { [name: string]: Proxy<any> } = {};
 
         constructor() {
             if (Model.inst !== null) {
@@ -19,7 +19,7 @@ module puremvc {
             Model.inst = this;
         }
 
-        registerProxy(proxy: Proxy): void {
+        registerProxy(proxy: Proxy<any>): void {
             const name: string = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Register invalid proxy`);
@@ -38,12 +38,12 @@ module puremvc {
             if (this.hasProxy(name) === false) {
                 throw Error(`Remove non-existent proxy: ${name}`);
             }
-            const proxy: Proxy = this.$proxies[name];
+            const proxy: Proxy<any> = this.$proxies[name];
             delete this.$proxies[name];
             proxy.onRemove();
         }
 
-        retrieveProxy(name: string): Proxy {
+        retrieveProxy(name: string): Proxy<any> {
             return this.$proxies[name] || null;
         }
 

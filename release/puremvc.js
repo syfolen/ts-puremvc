@@ -21,13 +21,13 @@ var puremvc;
             }
             Controller.inst = this;
         }
-        Controller.prototype.executeCommand = function (name, args) {
+        Controller.prototype.executeCommand = function (name, data) {
             var cmd = new this.$commands[name]();
-            if (args instanceof Array) {
-                cmd.execute.apply(cmd, args);
+            if (data instanceof Array) {
+                cmd.execute.apply(cmd, data);
             }
             else {
-                cmd.execute.call(cmd, args);
+                cmd.execute.call(cmd, data);
             }
         };
         Controller.prototype.registerCommand = function (name, cls, priority, args) {
@@ -43,9 +43,6 @@ var puremvc;
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
-        };
-        Controller.prototype.retrieveCommand = function (name) {
-            return this.$commands[name] || null;
         };
         Controller.prototype.hasCommand = function (name) {
             return this.$commands[name] !== void 0;
@@ -73,8 +70,8 @@ var puremvc;
         };
         Facade.prototype.$initializeFacade = function () {
             this.$initializeModel();
-            this.$initializeView();
             this.$initializeController();
+            this.$initializeView();
         };
         Facade.prototype.$initializeModel = function () {
         };
@@ -121,8 +118,8 @@ var puremvc;
         Facade.prototype.hasMediator = function (name) {
             return this.$view.hasMediator(name);
         };
-        Facade.prototype.sendNotification = function (name, args, cancelable) {
-            this.$view.notifyObservers(name, args, cancelable);
+        Facade.prototype.sendNotification = function (name, data, cancelable) {
+            this.$view.notifyObservers(name, data, cancelable);
         };
         Facade.prototype.notifyCancel = function () {
             this.$view.notifyCancel();
@@ -265,15 +262,6 @@ var puremvc;
             for (var i = 0; i < observers.length; i++) {
                 var observer_1 = observers[i];
                 if (observer_1.method === method && observer_1.caller === caller) {
-                    observer_1.args = args;
-                    var b0 = observer_1.priority === priority;
-                    var b1 = observer_1.receiveOnce === receiveOnce;
-                    if (b0 === false || b1 === false) {
-                        var s0 = b0 === true ? "" : "priority:" + priority;
-                        var s1 = b1 === true ? "" : "receiveOnce:" + receiveOnce;
-                        var s2 = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn("\u91CD\u590D\u6CE8\u518C\u4E8B\u4EF6\uFF0C\u4E2A\u522B\u53C2\u6570\u672A\u66F4\u65B0\uFF1A" + s0 + s2 + s1);
-                    }
                     return null;
                 }
                 if (index === -1 && observer_1.priority < priority) {
@@ -326,10 +314,7 @@ var puremvc;
                 delete this.$observers[name];
             }
         };
-        View.prototype.notifyCancel = function () {
-            this.$isCanceled = true;
-        };
-        View.prototype.notifyObservers = function (name, args, cancelable) {
+        View.prototype.notifyObservers = function (name, data, cancelable) {
             if (cancelable === void 0) { cancelable = true; }
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Notify invalid command");
@@ -346,21 +331,21 @@ var puremvc;
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
                 }
-                var params = observer.args === null ? args : observer.args.concat(args);
+                var args = observer.args === null ? data : observer.args.concat(data);
                 if (observer.caller === Controller.inst) {
-                    observer.method.call(observer.caller, name, params);
+                    observer.method.call(observer.caller, name, args);
                 }
-                else if (params instanceof Array) {
-                    observer.method.apply(observer.caller, params);
+                else if (args instanceof Array) {
+                    observer.method.apply(observer.caller, args);
                 }
                 else {
-                    observer.method.call(observer.caller, params);
+                    observer.method.call(observer.caller, args);
                 }
                 if (this.$isCanceled) {
                     if (cancelable === true) {
                         break;
                     }
-                    console.error("\u5C1D\u8BD5\u53D6\u6D88\u4E0D\u53EF\u88AB\u53D6\u6D88\u7684\u547D\u4EE4\uFF1A" + name);
+                    console.error("\u5C1D\u8BD5\u53D6\u6D88\u4E0D\u53EF\u88AB\u53D6\u6D88\u7684\u901A\u77E5\uFF1A" + name);
                     this.$isCanceled = false;
                 }
             }
@@ -370,6 +355,9 @@ var puremvc;
                 var observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
             }
+        };
+        View.prototype.notifyCancel = function () {
+            this.$isCanceled = true;
         };
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.getMediatorName();

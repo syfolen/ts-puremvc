@@ -6,13 +6,13 @@ module puremvc {
      */
     export class Mediator<T> extends Notifier {
         /**
-         * 实例名字
+         * 实例名字（内置属性，请勿操作）
          * export
          */
         private $mediatorName: string = null;
 
         /**
-         * 视图感兴趣的通知列表
+         * 视图感兴趣的通知列表（内置属性，请勿操作）
          * export
          */
         private $notificationInterests: Observer[] = [];
