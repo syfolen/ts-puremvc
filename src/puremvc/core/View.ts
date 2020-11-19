@@ -298,6 +298,7 @@ module puremvc {
                     this.$isCanceled = false;
                 }
             }
+
             // 回归历史通知状态
             this.$isCanceled = isCanceled;
             // 解锁
