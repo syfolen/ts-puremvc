@@ -8,13 +8,13 @@ module puremvc {
         static inst: View = null;
 
         private $pool: Observer[] = [];
-        private $mediators: IDictionary<Mediator> = {};
-
-        private $workings: IDictionary<boolean> = {};
-        private $observers: IDictionary<Observer[]> = {};
+        private $lockers: { [name: string]: boolean } = {};
+        private $observers: { [name: string]: Observer[] } = {};
 
         private $isCanceled: boolean = false;
         private $onceObservers: Observer[] = [];
+
+        private $mediators: { [name: string]: Mediator } = {};
 
         constructor() {
             if (View.inst !== null) {
@@ -38,10 +38,9 @@ module puremvc {
             if (observers === void 0) {
                 observers = this.$observers[name] = [];
             }
-            // 若列表正在工作，则复制列表
-            else if (this.$workings[name] === true) {
-                // 标记为未在工作
-                this.$workings[name] = false;
+            // 解锁并复制被锁定的列表
+            else if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
 
@@ -97,10 +96,9 @@ module puremvc {
             if (observers === void 0) {
                 return;
             }
-            // 若列表正在工作，则复制列表
-            if (this.$workings[name] === true) {
-                // 标记为未在工作
-                this.$workings[name] = false;
+            // 解锁并复制被锁定的列表
+            if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
             for (let i: number = 0; i < observers.length; i++) {
@@ -114,7 +112,7 @@ module puremvc {
 
             // 移除空列表
             if (observers.length === 0) {
-                delete this.$workings[name];
+                delete this.$lockers[name];
                 delete this.$observers[name];
             }
         }
@@ -135,8 +133,8 @@ module puremvc {
             if (observers === void 0) {
                 return;
             }
-            // 标记为正在工作
-            this.$workings[name] = true;
+            // 锁定列表
+            this.$lockers[name] = true;
 
             // 记录历史命令状态
             const isCanceled: boolean = this.$isCanceled;
@@ -171,8 +169,8 @@ module puremvc {
             }
             // 回归历史命令状态
             this.$isCanceled = isCanceled;
-            // 标记为未在工作
-            this.$workings[name] = false;
+            // 解锁
+            this.$lockers[name] = false;
 
             // 注销一次性命令
             while (this.$onceObservers.length > 0) {

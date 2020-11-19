@@ -7,7 +7,7 @@ module puremvc {
 
         static inst: Model = null;
 
-        private $proxies: IDictionary<Proxy> = {};
+        private $proxies: { [name: string]: Proxy } = {};
 
         constructor() {
             if (Model.inst !== null) {

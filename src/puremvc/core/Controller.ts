@@ -7,7 +7,7 @@ module puremvc {
 
         static inst: Controller = null;
 
-        private $commands: IDictionary<new () => ICommand> = {};
+        private $commands: { [name: string]: new () => ICommand } = {};
 
         constructor() {
             if (Controller.inst !== null) {
