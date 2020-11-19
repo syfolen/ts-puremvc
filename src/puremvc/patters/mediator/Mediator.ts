@@ -1,23 +1,30 @@
 
 module puremvc {
     /**
+     * 视图中介者
      * export
      */
-    export class Mediator extends Notifier {
-
+    export class Mediator<T> extends Notifier {
+        /**
+         * 实例名字（内置属性，请勿操作）
+         */
         private $mediatorName: string = null;
+
+        /**
+         * 视图感兴趣的通知列表（内置属性，请勿操作）
+         */
         private $notificationInterests: Observer[] = [];
 
         /**
-         * 未初始化时值为：null
+         * 视图组件实例，未初始化时值为：null
          * export
          */
-        protected $viewComponent: any = null;
+        protected $viewComponent: T = null;
 
         /**
          * export
          */
-        constructor(name: string, viewComponent?: any) {
+        constructor(name: string, viewComponent?: T) {
             super();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`无效的中介者对象名字`);
@@ -26,16 +33,23 @@ module puremvc {
             this.$viewComponent = viewComponent || null;
         }
 
+        /**
+         * 获取实例名字
+         */
         getMediatorName(): string {
             return this.$mediatorName;
         }
 
+        /**
+         * 列举感兴趣的通知
+         * export
+         */
         listNotificationInterests(): void {
 
         }
 
         /**
-         * 移除感兴趣的事件列表（内置方法，请勿调用）
+         * 移除感兴趣的通知列表（内置方法，请勿调用）
          */
         removeNotificationInterests(): void {
             for (let i: number = 0; i < this.$notificationInterests.length; i++) {
@@ -45,16 +59,11 @@ module puremvc {
         }
 
         /**
-         * 注册事件回调
-         * @priority: 优先级，优先响应级别高的消息，值越大，级别越高，默认为：suncom.EventPriorityEnum.MID
-         * @option: 可选参数，默认为：1
-         * 1. 为number时表示回调函数的响应间隔延时，最小为：1
-         * 2. 为CareModuleID时表示消息所关心的系统模块
-         * 3. 为数组时代表执行回调函数时的默认参数
+         * 指定通知处理函数，接口说明请参考: Facade.registerObserver
          * export
          */
         protected $handleNotification(name: string, method: Function, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option?: number | CareModuleID | any[] | IOption): void {
-            const observer: Observer = this.facade.registerObserver(name, method, this, void 0, priority, option);
+            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, option);
             observer && this.$notificationInterests.push(observer);
         }
 
@@ -75,16 +84,18 @@ module puremvc {
         }
 
         /**
+         * 获取视图组件实例
          * export
          */
-        getViewComponent(): any {
+        getViewComponent(): T {
             return this.$viewComponent;
         }
 
         /**
+         * 指定视图组件实例
          * export
          */
-        setViewComponent(view: any): void {
+        setViewComponent(view: T): void {
             this.$viewComponent = view || null;
         }
     }

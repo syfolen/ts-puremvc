@@ -1,22 +1,25 @@
 
 module puremvc {
     /**
+     * 数据代理类
      * export
      */
-    export class Proxy extends Notifier {
-
+    export class Proxy<T> extends Notifier {
+        /**
+         * 代理名字（内置属性，请勿操作）
+         */
         private $proxyName: string = null;
 
         /**
-         * 未初始化时值为：void 0
+         * 数据模型，未初始化时值为：void 0
          * export
          */
-        protected $data: any = void 0;
+        protected $data: T = void 0;
 
         /**
          * export
          */
-        constructor(name: string, data?: any) {
+        constructor(name: string, data?: T) {
             super();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`无效的模型类名字`);
@@ -25,6 +28,9 @@ module puremvc {
             this.$proxyName = name;
         }
 
+        /**
+         * 获取代理名字
+         */
         getProxyName(): string {
             return this.$proxyName || null;
         }
@@ -46,16 +52,18 @@ module puremvc {
         }
 
         /**
+         * 获取数据模型
          * export
          */
-        getData(): any {
+        getData(): T {
             return this.$data;
         }
 
         /**
+         * 指定数据模型
          * export
          */
-        setData(data: any): void {
+        setData(data: T): void {
             this.$data = data;
         }
     }

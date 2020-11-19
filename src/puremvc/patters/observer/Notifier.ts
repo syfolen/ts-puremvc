@@ -1,18 +1,19 @@
 
 module puremvc {
     /**
+     * 通知派发者
      * export
      */
     export class Notifier {
         /**
-         * MsgQ消息模块标识，默认为MMI
-         */
-        private $msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
-
-        /**
          * PureMVC外观引用
          */
-        private $facade: Facade = Facade.getInstance();
+        private readonly $facade: Facade = Facade.getInstance();
+
+        /**
+         * MsgQ消息模块标识，默认为: MMI（内置属性，请勿操作）
+         */
+        private $msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
 
         /**
          * 是否己销毁

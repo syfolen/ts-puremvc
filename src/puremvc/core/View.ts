@@ -7,22 +7,40 @@ module puremvc {
 
         static inst: View = null;
 
+        /**
+         * 观察者对象对象池
+         */
         private $pool: Observer[] = [];
+        /**
+         * 命令锁集合，用于防止注册与注销行为对正在响应的观察者列表产生干扰
+         */
         private $lockers: { [name: string]: boolean } = {};
+        /**
+         * 观察者对象集合
+         */
         private $observers: { [name: string]: Observer[] } = {};
 
+        /**
+         * 通知是否己取消
+         */
         private $isCanceled: boolean = false;
+        /**
+         * 己响应的一次性观察者列表
+         */
         private $onceObservers: Observer[] = [];
 
-        private $mediators: { [name: string]: Mediator } = {};
+        /**
+         * 视图中介者对象集合
+         */
+        private $mediators: { [name: string]: Mediator<any> } = {};
 
         /**
-         * suncore模块状态
+         * suncore模块状态集合
          */
         private $modStatMap: { [mod: number]: boolean } = {};
 
         /**
-         * 关心suncore模块状态的命令
+         * 关心suncore模块状态的命令集合
          */
         private $careStatCmds: { [mod: number]: boolean } = {};
 
@@ -48,22 +66,10 @@ module puremvc {
             this.$modStatMap[mod] = false;
         }
 
-        /**
-         * 关心模块状态的命令
-         */
         setCareStatForCmd(cmd: string): void {
             this.$careStatCmds[cmd] = true;
         }
 
-        /**
-         * @receiveOnce: 是否只响应一次，默认为：false
-         * @priority: 优先级，优先响应级别高的消息，值越大，级别越高，默认为：suncom.EventPriorityEnum.MID
-         * @option: 可选参数，默认为：1
-         * 1. 为number时表示回调函数的响应间隔延时，最小为：1
-         * 2. 为CareModuleID时表示消息所关心的系统模块
-         * 3. 为数组时代表执行回调函数时的默认参数
-         * export
-         */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option: number | CareModuleID | any[] | IOption = 1): Observer {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的监听`);
@@ -85,6 +91,7 @@ module puremvc {
                 this.$observers[name] = observers = observers.slice();
             }
 
+            // option应当始终为IOption类型的对象
             option = this.$createOption(option);
             if (option.delay === void 0) {
                 option.delay = 1;
@@ -98,19 +105,9 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    option.counter = observer.option.counter;
-                    observer.option = option;
-                    const b0: boolean = observer.priority === priority;
-                    const b1: boolean = observer.receiveOnce === receiveOnce;
-                    if (b0 === false || b1 === false) {
-                        const s0: string = b0 === true ? "" : "priority:" + priority;
-                        const s1: string = b1 === true ? "" : "receiveOnce:" + receiveOnce;
-                        const s2: string = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn(`重复注册事件，个别参数未更新：${s0}${s2}${s1}`);
-                    }
                     return null;
                 }
-                // 优先级高的命令先执行
+                // 优先级高的通知先执行
                 if (index === -1 && observer.priority < priority) {
                     index = i;
                 }
@@ -174,7 +171,6 @@ module puremvc {
                 caller = null;
             }
             let observers: Observer[] = this.$observers[name];
-            // 无此类事件
             if (observers === void 0) {
                 return;
             }
@@ -201,11 +197,6 @@ module puremvc {
             }
         }
 
-        /**
-         * 查询是否存在观察者
-         * @method: 若为null，则只校验caller
-         * @caller: 若为null，则只校验method
-         */
         hasObserver(name: string, method: Function, caller: Object): boolean {
             if (method === void 0) { method = null; }
             if (caller === void 0) { caller = null; }
@@ -216,7 +207,6 @@ module puremvc {
                 throw Error(`method和caller不允许同时为空`);
             }
             let observers: Observer[] = this.$observers[name];
-            // 无此类事件
             if (observers === void 0) {
                 return false;
             }
@@ -239,24 +229,11 @@ module puremvc {
             return false;
         }
 
-        notifyCancel(): void {
-            this.$isCanceled = true;
-        }
-
-        /**
-         * 通知观察者
-         * @args: 参数列表，允许为任意类型的数据
-         * @cancelable: 通知是否允许取消，默认为：true
-         * @force: 强制响应，默认为：false
-         * 说明：
-         * 1. 有些事件关心模块状态，在模块未激活的情况下，将force设为true可以强制响应这类事件
-         */
-        notifyObservers(name: string, args?: any, cancelable: boolean = true, force: boolean = false): void {
+        notifyObservers(name: string, data?: any, cancelable: boolean = true, force: boolean = false): void {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`派发无效的通知`);
             }
             const observers: Observer[] = this.$observers[name];
-            // 无此类事件
             if (observers === void 0) {
                 return;
             }
@@ -265,9 +242,9 @@ module puremvc {
             // 锁定模块
             MutexLocker.lock(name);
 
-            // 记录历史命令状态
+            // 记录历史通知状态
             const isCanceled: boolean = this.$isCanceled;
-            // 标记当前命令未取消
+            // 标记通知未取消
             this.$isCanceled = false;
 
             for (let i: number = 0; i < observers.length; i++) {
@@ -279,7 +256,7 @@ module puremvc {
                         continue;
                     }
                 }
-                // 一次性命令入栈
+                // 一次性观察者入栈
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
                 }
@@ -301,41 +278,45 @@ module puremvc {
                     option.counter = 0;
                 }
 
-                const params: any = option.args ? option.args.concat(args) : args;
+                const args: any = option.args ? option.args.concat(data) : data;
                 if (observer.caller === Controller.inst) {
-                    observer.method.call(observer.caller, name, params);
+                    observer.method.call(observer.caller, name, args);
                 }
-                else if (params instanceof Array) {
-                    observer.method.apply(observer.caller, params);
+                else if (args instanceof Array) {
+                    observer.method.apply(observer.caller, args);
                 }
                 else {
-                    observer.method.call(observer.caller, params);
+                    observer.method.call(observer.caller, args);
                 }
-                // 命令被取消
+                // 通知被取消
                 if (this.$isCanceled) {
-                    // 命令允许被取消
+                    // 通知允许被取消
                     if (cancelable === true) {
                         break;
                     }
-                    console.error(`尝试取消不可被取消的命令：${name}`);
+                    console.error(`尝试取消不可被取消的通知：${name}`);
                     this.$isCanceled = false;
                 }
             }
-            // 回归历史命令状态
+            // 回归历史通知状态
             this.$isCanceled = isCanceled;
             // 解锁
             this.$lockers[name] = false;
             // 释放模块
             MutexLocker.unlock(name);
 
-            // 注销一次性命令
+            // 注销一次性观察者
             while (this.$onceObservers.length > 0) {
                 const observer: Observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
             }
         }
 
-        registerMediator(mediator: Mediator): void {
+        notifyCancel(): void {
+            this.$isCanceled = true;
+        }
+
+        registerMediator(mediator: Mediator<any>): void {
             const name: string = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的中介者对象`);
@@ -355,13 +336,13 @@ module puremvc {
             if (this.hasMediator(name) === false) {
                 throw Error(`移除不存在的中介者对象${name}`);
             }
-            const mediator: Mediator = this.$mediators[name];
+            const mediator: Mediator<any> = this.$mediators[name];
             delete this.$mediators[name];
             mediator.removeNotificationInterests();
             mediator.onRemove();
         }
 
-        retrieveMediator(name: string): Mediator {
+        retrieveMediator(name: string): Mediator<any> {
             if (MutexLocker.enableMMIAction() === false) {
                 throw Error(`非MMI模块禁用接口`);
             }

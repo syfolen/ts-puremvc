@@ -27,13 +27,13 @@ var puremvc;
             }
             Controller.inst = this;
         }
-        Controller.prototype.executeCommand = function (name, args) {
+        Controller.prototype.executeCommand = function (name, data) {
             var cmd = new this.$commands[name]();
-            if (args instanceof Array) {
-                cmd.execute.apply(cmd, args);
+            if (data instanceof Array) {
+                cmd.execute.apply(cmd, data);
             }
             else {
-                cmd.execute.call(cmd, args);
+                cmd.execute.call(cmd, data);
             }
         };
         Controller.prototype.registerCommand = function (name, cls, priority, option) {
@@ -49,9 +49,6 @@ var puremvc;
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
-        };
-        Controller.prototype.retrieveCommand = function (name) {
-            return this.$commands[name] || null;
         };
         Controller.prototype.hasCommand = function (name) {
             return this.$commands[name] !== void 0;
@@ -80,8 +77,8 @@ var puremvc;
         Facade.prototype.$initializeFacade = function () {
             this.$initMsgQ();
             this.$initializeModel();
-            this.$initializeView();
             this.$initializeController();
+            this.$initializeView();
         };
         Facade.prototype.$initMsgQ = function () {
             MutexLocker.scope = new MutexScope();
@@ -174,9 +171,9 @@ var puremvc;
             MutexLocker.deactive();
             return this.$view.hasMediator(name);
         };
-        Facade.prototype.sendNotification = function (name, args, cancelable, force) {
+        Facade.prototype.sendNotification = function (name, data, cancelable, force) {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$view.notifyObservers(name, args, cancelable, force);
+            this.$view.notifyObservers(name, data, cancelable, force);
             MutexLocker.deactive();
         };
         Facade.prototype.notifyCancel = function () {
@@ -414,8 +411,8 @@ var puremvc;
     puremvc.MutexScope = MutexScope;
     var Notifier = (function () {
         function Notifier(msgQMod) {
-            this.$msgQMod = suncore.MsgQModEnum.MMI;
             this.$facade = Facade.getInstance();
+            this.$msgQMod = suncore.MsgQModEnum.MMI;
             this.$destroyed = false;
             if (msgQMod !== void 0) {
                 this.$msgQMod = msgQMod;
@@ -562,16 +559,6 @@ var puremvc;
             for (var i = 0; i < observers.length; i++) {
                 var observer_1 = observers[i];
                 if (observer_1.method === method && observer_1.caller === caller) {
-                    option.counter = observer_1.option.counter;
-                    observer_1.option = option;
-                    var b0 = observer_1.priority === priority;
-                    var b1 = observer_1.receiveOnce === receiveOnce;
-                    if (b0 === false || b1 === false) {
-                        var s0 = b0 === true ? "" : "priority:" + priority;
-                        var s1 = b1 === true ? "" : "receiveOnce:" + receiveOnce;
-                        var s2 = s0 === "" || s1 === "" ? "" : ", ";
-                        console.warn("\u91CD\u590D\u6CE8\u518C\u4E8B\u4EF6\uFF0C\u4E2A\u522B\u53C2\u6570\u672A\u66F4\u65B0\uFF1A" + s0 + s2 + s1);
-                    }
                     return null;
                 }
                 if (index === -1 && observer_1.priority < priority) {
@@ -690,10 +677,7 @@ var puremvc;
             }
             return false;
         };
-        View.prototype.notifyCancel = function () {
-            this.$isCanceled = true;
-        };
-        View.prototype.notifyObservers = function (name, args, cancelable, force) {
+        View.prototype.notifyObservers = function (name, data, cancelable, force) {
             if (cancelable === void 0) { cancelable = true; }
             if (force === void 0) { force = false; }
             if (isStringNullOrEmpty(name) === true) {
@@ -734,21 +718,21 @@ var puremvc;
                     }
                     option.counter = 0;
                 }
-                var params = option.args ? option.args.concat(args) : args;
+                var args = option.args ? option.args.concat(data) : data;
                 if (observer.caller === Controller.inst) {
-                    observer.method.call(observer.caller, name, params);
+                    observer.method.call(observer.caller, name, args);
                 }
-                else if (params instanceof Array) {
-                    observer.method.apply(observer.caller, params);
+                else if (args instanceof Array) {
+                    observer.method.apply(observer.caller, args);
                 }
                 else {
-                    observer.method.call(observer.caller, params);
+                    observer.method.call(observer.caller, args);
                 }
                 if (this.$isCanceled) {
                     if (cancelable === true) {
                         break;
                     }
-                    console.error("\u5C1D\u8BD5\u53D6\u6D88\u4E0D\u53EF\u88AB\u53D6\u6D88\u7684\u547D\u4EE4\uFF1A" + name);
+                    console.error("\u5C1D\u8BD5\u53D6\u6D88\u4E0D\u53EF\u88AB\u53D6\u6D88\u7684\u901A\u77E5\uFF1A" + name);
                     this.$isCanceled = false;
                 }
             }
@@ -759,6 +743,9 @@ var puremvc;
                 var observer = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
             }
+        };
+        View.prototype.notifyCancel = function () {
+            this.$isCanceled = true;
         };
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.getMediatorName();
@@ -847,7 +834,7 @@ var puremvc;
         };
         Mediator.prototype.$handleNotification = function (name, method, priority, option) {
             if (priority === void 0) { priority = suncom.EventPriorityEnum.MID; }
-            var observer = this.facade.registerObserver(name, method, this, void 0, priority, option);
+            var observer = View.inst.registerObserver(name, method, this, void 0, priority, option);
             observer && this.$notificationInterests.push(observer);
         };
         Mediator.prototype.onRegister = function () {

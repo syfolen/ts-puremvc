@@ -7,6 +7,9 @@ module puremvc {
 
         static inst: Controller = null;
 
+        /**
+         * 命令集合
+         */
         private $commands: { [name: string]: new () => ICommand } = {};
 
         constructor() {
@@ -16,13 +19,13 @@ module puremvc {
             Controller.inst = this;
         }
 
-        executeCommand(name: string, args: any): void {
+        executeCommand(name: string, data: any): void {
             const cmd: ICommand = new this.$commands[name]();
-            if (args instanceof Array) {
-                cmd.execute.apply(cmd, args);
+            if (data instanceof Array) {
+                cmd.execute.apply(cmd, data);
             }
             else {
-                cmd.execute.call(cmd, args);
+                cmd.execute.call(cmd, data);
             }
         }
 
@@ -40,10 +43,6 @@ module puremvc {
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
-        }
-
-        retrieveCommand(name: string): new () => ICommand {
-            return this.$commands[name] || null;
         }
 
         hasCommand(name: string): boolean {
