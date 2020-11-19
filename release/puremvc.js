@@ -198,20 +198,20 @@ var puremvc;
         Model.prototype.registerProxy = function (proxy) {
             var name = proxy.getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("\u6CE8\u518C\u65E0\u6548\u7684Proxy");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u6A21\u578B\u7C7B");
             }
             if (this.hasProxy(name) === true) {
-                throw Error("\u91CD\u590D\u6CE8\u518CProxy\uFF1A" + name);
+                throw Error("\u91CD\u590D\u6CE8\u518C\u6A21\u578B\u7C7B\uFF1A" + name);
             }
             this.$proxies[name] = proxy;
             proxy.onRegister();
         };
         Model.prototype.removeProxy = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("\u79FB\u9664\u65E0\u6548\u7684Proxy");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u6A21\u578B\u7C7B");
             }
             if (this.hasProxy(name) === false) {
-                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684Proxy\uFF1A" + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684\u6A21\u578B\u7C7B\uFF1A" + name);
             }
             var proxy = this.$proxies[name];
             delete this.$proxies[name];
@@ -468,7 +468,7 @@ var puremvc;
             _this.$proxyName = null;
             _this.$data = void 0;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("\u65E0\u6548\u7684Proxy\u540D\u5B57");
+                throw Error("\u65E0\u6548\u7684\u6A21\u578B\u7C7B\u540D\u5B57");
             }
             _this.$data = data;
             _this.$proxyName = name;
@@ -500,12 +500,12 @@ var puremvc;
     puremvc.SimpleCommand = SimpleCommand;
     var View = (function () {
         function View() {
-            this.$mediators = {};
-            this.$workings = {};
+            this.$pool = [];
+            this.$lockers = {};
             this.$observers = {};
             this.$isCanceled = false;
             this.$onceObservers = [];
-            this.$recycle = [];
+            this.$mediators = {};
             this.$modStatMap = {};
             this.$careStatCmds = {};
             if (View.inst !== null) {
@@ -546,8 +546,8 @@ var puremvc;
             if (observers === void 0) {
                 observers = this.$observers[name] = [];
             }
-            else if (this.$workings[name] === true) {
-                this.$workings[name] = false;
+            else if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
             option = this.$createOption(option);
@@ -579,7 +579,7 @@ var puremvc;
                 }
             }
             MutexLocker.create(name, caller);
-            var observer = this.$recycle.length > 0 ? this.$recycle.pop() : new Observer();
+            var observer = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
             observer.name = name;
             observer.caller = caller;
             observer.method = method;
@@ -637,21 +637,21 @@ var puremvc;
             if (observers === void 0) {
                 return;
             }
-            if (this.$workings[name] === true) {
-                this.$workings[name] = false;
+            if (this.$lockers[name] === true) {
+                this.$lockers[name] = false;
                 this.$observers[name] = observers = observers.slice();
             }
             for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observers.splice(i, 1);
-                    this.$recycle.push(observer);
+                    this.$pool.push(observer);
                     MutexLocker.release(name, caller);
                     break;
                 }
             }
             if (observers.length === 0) {
-                delete this.$workings[name];
+                delete this.$lockers[name];
                 delete this.$observers[name];
             }
         };
@@ -703,7 +703,7 @@ var puremvc;
             if (observers === void 0) {
                 return;
             }
-            this.$workings[name] = true;
+            this.$lockers[name] = true;
             MutexLocker.lock(name);
             var isCanceled = this.$isCanceled;
             this.$isCanceled = false;
@@ -727,11 +727,13 @@ var puremvc;
                     }
                     continue;
                 }
-                option.counter++;
-                if (option.counter < option.delay) {
-                    continue;
+                if (option.delay > 1) {
+                    option.counter++;
+                    if (option.counter < option.delay) {
+                        continue;
+                    }
+                    option.counter = 0;
                 }
-                option.counter = 0;
                 var params = option.args ? option.args.concat(args) : args;
                 if (observer.caller === Controller.inst) {
                     observer.method.call(observer.caller, name, params);
@@ -751,7 +753,7 @@ var puremvc;
                 }
             }
             this.$isCanceled = isCanceled;
-            this.$workings[name] = false;
+            this.$lockers[name] = false;
             MutexLocker.unlock(name);
             while (this.$onceObservers.length > 0) {
                 var observer = this.$onceObservers.pop();
@@ -761,10 +763,10 @@ var puremvc;
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("\u6CE8\u518C\u65E0\u6548\u7684Mediator");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61");
             }
             if (this.hasMediator(name) === true) {
-                throw Error("\u91CD\u590D\u6CE8\u518CMediator" + name);
+                throw Error("\u91CD\u590D\u6CE8\u518C\u4E2D\u4ECB\u8005\u5BF9\u8C61" + name);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -772,10 +774,10 @@ var puremvc;
         };
         View.prototype.removeMediator = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("\u79FB\u9664\u65E0\u6548\u7684Mediator");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61");
             }
             if (this.hasMediator(name) === false) {
-                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684Mediator" + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61" + name);
             }
             var mediator = this.$mediators[name];
             delete this.$mediators[name];
@@ -826,7 +828,7 @@ var puremvc;
             _this.$notificationInterests = [];
             _this.$viewComponent = null;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("\u65E0\u6548\u7684Mediator\u540D\u5B57");
+                throw Error("\u65E0\u6548\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61\u540D\u5B57");
             }
             _this.$mediatorName = name;
             _this.$viewComponent = viewComponent || null;
