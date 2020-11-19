@@ -50,6 +50,16 @@ declare module puremvc {
         protected $initializeController(): void;
 
         /**
+         * 注册监听
+         * @receiveOnce: 是否为一次性监听，默认为: false
+         * @priority: 响应优先级，值越大，优先级越高，默认为: 2
+         * @args[]: 回调参数列表，默认为: null
+         * 说明：
+         * 1. 若需覆盖参数，请先调用removeObserver移除监听后再重新注册
+         */
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: number, args?: any[]): void;
+
+        /**
          * 移除监听
          */
         removeObserver(name: string, method: Function, caller: Object): void;
@@ -122,6 +132,13 @@ declare module puremvc {
         hasMediator(name: string): boolean;
 
         /**
+         * 派发通知
+         * @data: 参数对象，允许为任意类型的数据，传递多个参数时可指定其为数组，若需要传递的data本身就是数组，则需要传递[data]
+         * @cancelable: 通知是否允许被取消，默认为: true
+         */
+        sendNotification(name: string, data?: any, cancelable?: boolean): void;
+
+        /**
          * 通知取消
          * 说明：
          * 1. 未响应的回调都将不再执行
@@ -150,21 +167,11 @@ declare module puremvc {
      */
     class Proxy<T> extends Notifier {
         /**
-         * 代理名字（内置属性，请勿操作）
-         */
-        private $proxyName: string;
-
-        /**
          * 数据模型，未初始化时值为：void 0
          */
         protected $data: T;
 
         constructor(name: string, data?: T);
-
-        /**
-         * 获取代理名字
-         */
-        getProxyName(): string;
 
         /**
          * 注册回调（此时己注册）
@@ -199,10 +206,6 @@ declare module puremvc {
      * 复合命令
      */
     abstract class MacroCommand extends Notifier implements ICommand {
-        /**
-         * 命令列表（内置属性，请勿操作）
-         */
-        private $commands: Array<new () => ICommand>;
 
         /**
          * 初始化复合命令
@@ -226,16 +229,6 @@ declare module puremvc {
      */
     class Mediator<T> extends Notifier {
         /**
-         * 实例名字（内置属性，请勿操作）
-         */
-        private $mediatorName: string;
-
-        /**
-         * 视图感兴趣的通知列表（内置属性，请勿操作）
-         */
-        private $notificationInterests: Observer[];
-
-        /**
          * 视图组件实例，未初始化时值为：null
          */
         protected $viewComponent: T;
@@ -243,19 +236,9 @@ declare module puremvc {
         constructor(name: string, viewComponent?: T);
 
         /**
-         * 获取实例名字
-         */
-        getMediatorName(): string;
-
-        /**
          * 列举感兴趣的通知
          */
         listNotificationInterests(): void;
-
-        /**
-         * 移除感兴趣的通知列表（内置方法，请勿调用）
-         */
-        removeNotificationInterests(): void;
 
         /**
          * 指定通知处理函数，接口说明请参考: Facade.registerObserver

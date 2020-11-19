@@ -7,7 +7,6 @@ module puremvc {
     export class Proxy<T> extends Notifier {
         /**
          * 代理名字（内置属性，请勿操作）
-         * export
          */
         private $proxyName: string = null;
 
@@ -31,7 +30,6 @@ module puremvc {
 
         /**
          * 获取代理名字
-         * export
          */
         getProxyName(): string {
             return this.$proxyName || null;

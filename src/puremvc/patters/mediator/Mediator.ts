@@ -7,13 +7,11 @@ module puremvc {
     export class Mediator<T> extends Notifier {
         /**
          * 实例名字（内置属性，请勿操作）
-         * export
          */
         private $mediatorName: string = null;
 
         /**
          * 视图感兴趣的通知列表（内置属性，请勿操作）
-         * export
          */
         private $notificationInterests: Observer[] = [];
 
@@ -37,7 +35,6 @@ module puremvc {
 
         /**
          * 获取实例名字
-         * export
          */
         getMediatorName(): string {
             return this.$mediatorName;
@@ -53,7 +50,6 @@ module puremvc {
 
         /**
          * 移除感兴趣的通知列表（内置方法，请勿调用）
-         * export
          */
         removeNotificationInterests(): void {
             for (let i: number = 0; i < this.$notificationInterests.length; i++) {

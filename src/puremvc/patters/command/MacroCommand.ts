@@ -7,7 +7,6 @@ module puremvc {
     export abstract class MacroCommand extends Notifier implements ICommand {
         /**
          * 命令列表（内置属性，请勿操作）
-         * export
          */
         private $commands: Array<new () => ICommand> = [];
 
