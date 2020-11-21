@@ -62,6 +62,11 @@ declare module puremvc {
      */
     class Facade {
         /**
+         * 调试模式，为true时会输出日志，默认为: true
+         */
+        static DEBUG: boolean;
+
+        /**
          * 单例
          */
         static inst: Facade;

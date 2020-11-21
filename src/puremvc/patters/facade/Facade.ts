@@ -19,6 +19,12 @@ module puremvc {
      */
     export class Facade {
         /**
+         * 调试模式，为true时会输出日志，默认为: true
+         * export
+         */
+        static DEBUG: boolean = true;
+
+        /**
          * 单例
          * export
          */

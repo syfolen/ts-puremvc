@@ -105,6 +105,7 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
+                    Facade.DEBUG === true && console.warn(`忽略重复注册的监听 name:${name}`);
                     return null;
                 }
                 // 优先级高的通知先执行
