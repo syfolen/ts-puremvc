@@ -124,6 +124,7 @@ var puremvc;
         Facade.prototype.notifyCancel = function () {
             this.$view.notifyCancel();
         };
+        Facade.DEBUG = true;
         Facade.inst = null;
         return Facade;
     }());
@@ -262,6 +263,7 @@ var puremvc;
             for (var i = 0; i < observers.length; i++) {
                 var observer_1 = observers[i];
                 if (observer_1.method === method && observer_1.caller === caller) {
+                    Facade.DEBUG === true && console.warn("\u5FFD\u7565\u91CD\u590D\u6CE8\u518C\u7684\u76D1\u542C name:" + name);
                     return null;
                 }
                 if (index === -1 && observer_1.priority < priority) {
