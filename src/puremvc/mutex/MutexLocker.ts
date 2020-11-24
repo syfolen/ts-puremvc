@@ -129,7 +129,7 @@ module puremvc {
             if (checkPrefix === false) {
                 return;
             }
-            if (target === null || target === puremvc.Controller.inst || target === puremvc.View.inst) {
+            if (target === null || target === Controller.inst || target === View.inst) {
                 return;
             }
 
@@ -148,7 +148,7 @@ module puremvc {
             if (checkPrefix === false) {
                 return;
             }
-            if (target === null || target === puremvc.Controller.inst || target === puremvc.View.inst) {
+            if (target === null || target === Controller.inst || target === View.inst) {
                 return;
             }
 

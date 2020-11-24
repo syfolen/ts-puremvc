@@ -84,7 +84,7 @@ module puremvc {
         update(target: any): void {
             this.$target = target;
 
-            if (target instanceof puremvc.Notifier) {
+            if (target instanceof Notifier) {
                 this.$actMsgQMod = target.msgQMod;
             }
             else {
@@ -224,7 +224,7 @@ module puremvc {
          */
         backup(target: Object): void {
             let msgQMod: suncore.MsgQModEnum = null;
-            if (target instanceof puremvc.Notifier) {
+            if (target instanceof Notifier) {
                 msgQMod = target.msgQMod;
             }
             else {
