@@ -99,7 +99,7 @@ module puremvc {
             if (option.delay < 1) {
                 throw Error(`事件响应间隔应当大于0`);
             }
-            option.counter = 0;
+            option.$_counter = 0;
 
             let index: number = -1;
             for (let i: number = 0; i < observers.length; i++) {
@@ -133,7 +133,7 @@ module puremvc {
 
         private $createOption(data: any): IOption {
             if (typeof data === "number") {
-                if (data < CareModuleID.NONE) {
+                if (data < CareModuleID.$_NONE) {
                     return {
                         delay: data
                     };
@@ -272,11 +272,11 @@ module puremvc {
                 }
 
                 if (option.delay > 1) {
-                    option.counter++;
-                    if (option.counter < option.delay) {
+                    option.$_counter++;
+                    if (option.$_counter < option.delay) {
                         continue;
                     }
-                    option.counter = 0;
+                    option.$_counter = 0;
                 }
 
                 const args: any = option.args ? option.args.concat(data) : data;
@@ -319,7 +319,7 @@ module puremvc {
         }
 
         registerMediator(mediator: Mediator<any>): void {
-            const name: string = mediator.getMediatorName();
+            const name: string = mediator.$_getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的中介者对象`);
             }
@@ -340,7 +340,7 @@ module puremvc {
             }
             const mediator: Mediator<any> = this.$mediators[name];
             delete this.$mediators[name];
-            mediator.removeNotificationInterests();
+            mediator.$_removeNotificationInterests();
             mediator.onRemove();
         }
 

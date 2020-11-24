@@ -26,6 +26,6 @@ module puremvc {
         /**
          * 间隔计数器
          */
-        counter?: number;
+        $_counter?: number;
     }
 }
