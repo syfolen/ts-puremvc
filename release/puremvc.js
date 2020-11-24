@@ -429,6 +429,10 @@ var puremvc;
             _this.$viewComponent = viewComponent || null;
             return _this;
         }
+        Mediator.prototype.$handleNotification = function (name, method, priority, args) {
+            var observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
+            observer && this.$var_notificationInterests.push(observer);
+        };
         Mediator.prototype.func_getMediatorName = function () {
             return this.$var_mediatorName;
         };
@@ -439,10 +443,6 @@ var puremvc;
                 var observer = this.$var_notificationInterests[i];
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
-        };
-        Mediator.prototype.$handleNotification = function (name, method, priority, args) {
-            var observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
-            observer && this.$var_notificationInterests.push(observer);
         };
         Mediator.prototype.onRegister = function () {
         };

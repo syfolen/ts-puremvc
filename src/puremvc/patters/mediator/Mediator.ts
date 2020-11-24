@@ -33,6 +33,8 @@ module puremvc {
             this.$viewComponent = viewComponent || null;
         }
 
+        protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
+            observer && this.$var_notificationInterests.push(observer);
         /**
          * 获取实例名字
          */
@@ -56,15 +58,6 @@ module puremvc {
                 const observer: Observer = this.$var_notificationInterests[i];
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
-        }
-
-        /**
-         * 指定通知处理函数，接口说明请参考: Facade.registerObserver
-         * export
-         */
-        protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
-            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
-            observer && this.$var_notificationInterests.push(observer);
         }
 
         /**

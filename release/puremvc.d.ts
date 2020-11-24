@@ -235,14 +235,14 @@ declare module puremvc {
         constructor(name: string, viewComponent?: T);
 
         /**
-         * 列举感兴趣的通知
-         */
-        listNotificationInterests(): void;
-
-        /**
          * 指定通知处理函数，接口说明请参考: Facade.registerObserver
          */
         protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void;
+
+        /**
+         * 列举感兴趣的通知
+         */
+        listNotificationInterests(): void;
 
         /**
          * 注册回调（此时己注册）
