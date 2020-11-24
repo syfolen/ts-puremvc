@@ -139,11 +139,10 @@ module puremvc {
          * 1. 若需覆盖参数，请先调用removeObserver移除监听后再重新注册
          * export
          */
-        registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): Observer {
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
             const observer: Observer = this.$view.registerObserver(name, method, caller, receiveOnce, priority, option);
             MutexLocker.deactive();
-            return observer;
         }
 
         /**

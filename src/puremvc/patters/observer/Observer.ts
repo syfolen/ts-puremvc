@@ -1,8 +1,7 @@
 
 module puremvc {
     /**
-     * 观察者对象（内置对象，请勿在外部持有）
-     * export
+     * 观察者对象
      */
     export class Observer {
 

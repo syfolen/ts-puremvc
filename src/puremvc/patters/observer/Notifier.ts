@@ -11,7 +11,7 @@ module puremvc {
         private readonly $facade: Facade = Facade.getInstance();
 
         /**
-         * MsgQ消息模块标识，默认为: MMI（内置属性，请勿操作）
+         * MsgQ消息模块标识，默认为: MMI
          */
         private $msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
 
