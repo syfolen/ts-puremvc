@@ -632,8 +632,8 @@ var puremvc;
             for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    observers.splice(i, 1);
-                    this.$pool.push(observer);
+                    observer.option = observer.caller = observer.method = null;
+                    this.$pool.push(observers.splice(i, 1)[0]);
                     MutexLocker.release(name, caller);
                     break;
                 }
