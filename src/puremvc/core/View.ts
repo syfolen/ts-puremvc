@@ -187,7 +187,7 @@ module puremvc {
         }
 
         registerMediator(mediator: Mediator<any>): void {
-            const name: string = mediator.$_getMediatorName();
+            const name: string = mediator.func_getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Register invalid mediator`);
             }
@@ -208,7 +208,7 @@ module puremvc {
             }
             const mediator: Mediator<any> = this.$mediators[name];
             delete this.$mediators[name];
-            mediator.$_removeNotificationInterests();
+            mediator.func_removeNotificationInterests();
             mediator.onRemove();
         }
 

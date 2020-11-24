@@ -8,12 +8,12 @@ module puremvc {
         /**
          * 实例名字
          */
-        private $_mediatorName: string = null;
+        private $var_mediatorName: string = null;
 
         /**
          * 视图感兴趣的通知列表
          */
-        private $_notificationInterests: Observer[] = [];
+        private $var_notificationInterests: Observer[] = [];
 
         /**
          * 视图组件实例，未初始化时值为：null
@@ -29,15 +29,15 @@ module puremvc {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Invalid mediator name`);
             }
-            this.$_mediatorName = name;
+            this.$var_mediatorName = name;
             this.$viewComponent = viewComponent || null;
         }
 
         /**
          * 获取实例名字
          */
-        $_getMediatorName(): string {
-            return this.$_mediatorName;
+        func_getMediatorName(): string {
+            return this.$var_mediatorName;
         }
 
         /**
@@ -51,9 +51,9 @@ module puremvc {
         /**
          * 移除感兴趣的通知列表
          */
-        $_removeNotificationInterests(): void {
-            for (let i: number = 0; i < this.$_notificationInterests.length; i++) {
-                const observer: Observer = this.$_notificationInterests[i];
+        func_removeNotificationInterests(): void {
+            for (let i: number = 0; i < this.$var_notificationInterests.length; i++) {
+                const observer: Observer = this.$var_notificationInterests[i];
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
         }
@@ -64,7 +64,7 @@ module puremvc {
          */
         protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
             const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
-            observer && this.$_notificationInterests.push(observer);
+            observer && this.$var_notificationInterests.push(observer);
         }
 
         /**
