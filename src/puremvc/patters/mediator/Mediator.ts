@@ -8,12 +8,12 @@ module puremvc {
         /**
          * 实例名字
          */
-        private $_mediatorName: string = null;
+        private $var_mediatorName: string = null;
 
         /**
          * 视图感兴趣的通知列表
          */
-        private $_notificationInterests: Observer[] = [];
+        private $var_notificationInterests: Observer[] = [];
 
         /**
          * 视图组件实例，未初始化时值为：null
@@ -29,15 +29,24 @@ module puremvc {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`无效的中介者对象名字`);
             }
-            this.$_mediatorName = name;
+            this.$var_mediatorName = name;
             this.$viewComponent = viewComponent || null;
+        }
+
+        /**
+         * 指定通知处理函数，接口说明请参考: Facade.registerObserver
+         * export
+         */
+        protected $handleNotification(name: string, method: Function, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option?: number | CareModuleID | any[] | IOption): void {
+            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, option);
+            observer && this.$var_notificationInterests.push(observer);
         }
 
         /**
          * 获取实例名字
          */
-        $_getMediatorName(): string {
-            return this.$_mediatorName;
+        func_getMediatorName(): string {
+            return this.$var_mediatorName;
         }
 
         /**
@@ -51,20 +60,11 @@ module puremvc {
         /**
          * 移除感兴趣的通知列表
          */
-        $_removeNotificationInterests(): void {
-            for (let i: number = 0; i < this.$_notificationInterests.length; i++) {
-                const observer: Observer = this.$_notificationInterests[i];
+        func_removeNotificationInterests(): void {
+            for (let i: number = 0; i < this.$var_notificationInterests.length; i++) {
+                const observer: Observer = this.$var_notificationInterests[i];
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
-        }
-
-        /**
-         * 指定通知处理函数，接口说明请参考: Facade.registerObserver
-         * export
-         */
-        protected $handleNotification(name: string, method: Function, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option?: number | CareModuleID | any[] | IOption): void {
-            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, option);
-            observer && this.$_notificationInterests.push(observer);
         }
 
         /**

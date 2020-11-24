@@ -20,7 +20,7 @@ module puremvc {
         }
 
         registerProxy(proxy: Proxy<any>): void {
-            const name: string = proxy.$_getProxyName();
+            const name: string = proxy.func_getProxyName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的模型类`);
             }

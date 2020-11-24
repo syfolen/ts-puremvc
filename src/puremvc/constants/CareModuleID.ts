@@ -10,7 +10,7 @@ module puremvc {
         /**
          * 无
          */
-        $_NONE = 0xFFFF,
+        E_NONE = 0xFFFF,
 
         /**
          * suncore.ModuleEnum.CUSTOM

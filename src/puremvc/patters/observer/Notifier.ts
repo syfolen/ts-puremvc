@@ -8,12 +8,12 @@ module puremvc {
         /**
          * PureMVC外观引用
          */
-        private readonly $_facade: Facade = Facade.getInstance();
+        private readonly $var_facade: Facade = Facade.getInstance();
 
         /**
          * MsgQ消息模块标识，默认为: MMI
          */
-        private $_msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
+        private $var_msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
 
         /**
          * 是否己销毁
@@ -26,7 +26,7 @@ module puremvc {
          */
         constructor(msgQMod?: suncore.MsgQModEnum) {
             if (msgQMod !== void 0) {
-                this.$_msgQMod = msgQMod;
+                this.$var_msgQMod = msgQMod;
             }
         }
 
@@ -43,8 +43,8 @@ module puremvc {
          * export
          */
         protected get facade(): Facade {
-            MutexLocker.active(this.$_msgQMod);
-            return this.$_facade;
+            MutexLocker.active(this.$var_msgQMod);
+            return this.$var_facade;
         }
 
         /**
@@ -52,7 +52,7 @@ module puremvc {
          * export
          */
         get msgQMod(): suncore.MsgQModEnum {
-            return this.$_msgQMod;
+            return this.$var_msgQMod;
         }
 
         /**

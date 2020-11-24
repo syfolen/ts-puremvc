@@ -41,19 +41,19 @@ module puremvc {
             return Facade.inst;
         }
 
-        private $_view: View = new View();
-        private $_model: Model = new Model();
-        private $_controller: Controller = new Controller();
+        private $var_view: View = new View();
+        private $var_model: Model = new Model();
+        private $var_controller: Controller = new Controller();
 
         constructor() {
             if (Facade.inst !== null) {
                 throw Error(`重复构建PureMVC外观类！！！`);
             }
             Facade.inst = this;
-            this.$_initializeFacade();
+            this.$func_initializeFacade();
         }
 
-        private $_initializeFacade(): void {
+        private $func_initializeFacade(): void {
             this.$initMsgQ();
             this.$initializeModel();
             this.$initializeController();
@@ -124,7 +124,7 @@ module puremvc {
          * export
          */
         protected $setCareStatForCmd(cmd: string): void {
-            this.$_view.setCareStatForCmd(cmd);
+            this.$var_view.setCareStatForCmd(cmd);
         }
 
         /**
@@ -141,7 +141,7 @@ module puremvc {
          */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            const observer: Observer = this.$_view.registerObserver(name, method, caller, receiveOnce, priority, option);
+            const observer: Observer = this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, option);
             MutexLocker.deactive();
         }
 
@@ -151,7 +151,7 @@ module puremvc {
          */
         removeObserver(name: string, method: Function, caller: Object): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$_view.removeObserver(name, method, caller);
+            this.$var_view.removeObserver(name, method, caller);
             MutexLocker.deactive();
         }
 
@@ -163,7 +163,7 @@ module puremvc {
          */
         hasObserver(name: string, method: Function, caller?: Object): boolean {
             MutexLocker.deactive();
-            return this.$_view.hasObserver(name, method, caller);
+            return this.$var_view.hasObserver(name, method, caller);
         }
 
         /**
@@ -176,7 +176,7 @@ module puremvc {
          */
         registerCommand(name: string, cls: new () => ICommand, priority?: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
             MutexLocker.deactive();
-            this.$_controller.registerCommand(name, cls, priority, option);
+            this.$var_controller.registerCommand(name, cls, priority, option);
         }
 
         /**
@@ -185,7 +185,7 @@ module puremvc {
          */
         removeCommand(name: string): void {
             MutexLocker.deactive();
-            this.$_controller.removeCommand(name);
+            this.$var_controller.removeCommand(name);
         }
 
         /**
@@ -194,7 +194,7 @@ module puremvc {
          */
         hasCommand(name: string): boolean {
             MutexLocker.deactive();
-            return this.$_controller.hasCommand(name);
+            return this.$var_controller.hasCommand(name);
         }
 
         /**
@@ -205,7 +205,7 @@ module puremvc {
          */
         registerProxy(proxy: Proxy<any>): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$_model.registerProxy(proxy);
+            this.$var_model.registerProxy(proxy);
             MutexLocker.deactive();
         }
 
@@ -215,7 +215,7 @@ module puremvc {
          */
         removeProxy(name: string): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$_model.removeProxy(name);
+            this.$var_model.removeProxy(name);
             MutexLocker.deactive();
         }
 
@@ -227,7 +227,7 @@ module puremvc {
          */
         retrieveProxy(name: string): Proxy<any> {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            const proxy: Proxy<any> = this.$_model.retrieveProxy(name);
+            const proxy: Proxy<any> = this.$var_model.retrieveProxy(name);
             MutexLocker.deactive();
             return proxy;
         }
@@ -238,7 +238,7 @@ module puremvc {
          */
         hasProxy(name: string): boolean {
             MutexLocker.deactive();
-            return this.$_model.hasProxy(name);
+            return this.$var_model.hasProxy(name);
         }
 
         /**
@@ -249,7 +249,7 @@ module puremvc {
          */
         registerMediator(mediator: Mediator<any>): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$_view.registerMediator(mediator);
+            this.$var_view.registerMediator(mediator);
             MutexLocker.deactive();
         }
 
@@ -259,7 +259,7 @@ module puremvc {
          */
         removeMediator(name: string): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$_view.removeMediator(name);
+            this.$var_view.removeMediator(name);
             MutexLocker.deactive();
         }
 
@@ -271,7 +271,7 @@ module puremvc {
          */
         retrieveMediator(name: string): Mediator<any> {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            const mediator: Mediator<any> = this.$_view.retrieveMediator(name);
+            const mediator: Mediator<any> = this.$var_view.retrieveMediator(name);
             MutexLocker.deactive();
             return mediator;
         }
@@ -282,7 +282,7 @@ module puremvc {
          */
         hasMediator(name: string): boolean {
             MutexLocker.deactive();
-            return this.$_view.hasMediator(name);
+            return this.$var_view.hasMediator(name);
         }
 
         /**
@@ -296,7 +296,7 @@ module puremvc {
          */
         sendNotification(name: string, data?: any, cancelable?: boolean, force?: boolean): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$_view.notifyObservers(name, data, cancelable, force);
+            this.$var_view.notifyObservers(name, data, cancelable, force);
             MutexLocker.deactive();
         }
 
@@ -308,7 +308,7 @@ module puremvc {
          */
         notifyCancel(): void {
             MutexLocker.deactive();
-            this.$_view.notifyCancel();
+            this.$var_view.notifyCancel();
         }
     }
 }
