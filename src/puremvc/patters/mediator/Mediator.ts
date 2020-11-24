@@ -33,6 +33,8 @@ module puremvc {
             this.$viewComponent = viewComponent || null;
         }
 
+        /**
+         * 指定通知处理函数，接口说明请参考: Facade.registerObserver
          * export
          */
         protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
