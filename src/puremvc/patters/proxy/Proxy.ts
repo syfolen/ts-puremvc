@@ -8,7 +8,7 @@ module puremvc {
         /**
          * 代理名字
          */
-        private $proxyName: string = null;
+        private $_proxyName: string = null;
 
         /**
          * 数据模型，未初始化时值为：void 0
@@ -25,14 +25,14 @@ module puremvc {
                 throw Error(`Invalid proxy name`);
             }
             this.$data = data;
-            this.$proxyName = name;
+            this.$_proxyName = name;
         }
 
         /**
          * 获取代理名字
          */
-        getProxyName(): string {
-            return this.$proxyName || null;
+        $_getProxyName(): string {
+            return this.$_proxyName || null;
         }
 
         /**

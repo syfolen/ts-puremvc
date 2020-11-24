@@ -53,14 +53,14 @@ var puremvc;
     puremvc.Controller = Controller;
     var Facade = (function () {
         function Facade() {
-            this.$view = new View();
-            this.$model = new Model();
-            this.$controller = new Controller();
+            this.$_view = new View();
+            this.$_model = new Model();
+            this.$_controller = new Controller();
             if (Facade.inst !== null) {
                 throw Error("Facade singleton already constructed!");
             }
             Facade.inst = this;
-            this.$initializeFacade();
+            this.$_initializeFacade();
         }
         Facade.getInstance = function () {
             if (Facade.inst === null) {
@@ -68,7 +68,7 @@ var puremvc;
             }
             return Facade.inst;
         };
-        Facade.prototype.$initializeFacade = function () {
+        Facade.prototype.$_initializeFacade = function () {
             this.$initializeModel();
             this.$initializeController();
             this.$initializeView();
@@ -80,49 +80,49 @@ var puremvc;
         Facade.prototype.$initializeController = function () {
         };
         Facade.prototype.registerObserver = function (name, method, caller, receiveOnce, priority, args) {
-            this.$view.registerObserver(name, method, caller, receiveOnce, priority, args);
+            this.$_view.registerObserver(name, method, caller, receiveOnce, priority, args);
         };
         Facade.prototype.removeObserver = function (name, method, caller) {
-            this.$view.removeObserver(name, method, caller);
+            this.$_view.removeObserver(name, method, caller);
         };
         Facade.prototype.registerCommand = function (name, cls, priority, args) {
-            this.$controller.registerCommand(name, cls, priority, args);
+            this.$_controller.registerCommand(name, cls, priority, args);
         };
         Facade.prototype.removeCommand = function (name) {
-            this.$controller.removeCommand(name);
+            this.$_controller.removeCommand(name);
         };
         Facade.prototype.hasCommand = function (name) {
-            return this.$controller.hasCommand(name);
+            return this.$_controller.hasCommand(name);
         };
         Facade.prototype.registerProxy = function (proxy) {
-            this.$model.registerProxy(proxy);
+            this.$_model.registerProxy(proxy);
         };
         Facade.prototype.removeProxy = function (name) {
-            this.$model.removeProxy(name);
+            this.$_model.removeProxy(name);
         };
         Facade.prototype.retrieveProxy = function (name) {
-            return this.$model.retrieveProxy(name);
+            return this.$_model.retrieveProxy(name);
         };
         Facade.prototype.hasProxy = function (name) {
-            return this.$model.hasProxy(name);
+            return this.$_model.hasProxy(name);
         };
         Facade.prototype.registerMediator = function (mediator) {
-            this.$view.registerMediator(mediator);
+            this.$_view.registerMediator(mediator);
         };
         Facade.prototype.removeMediator = function (name) {
-            this.$view.removeMediator(name);
+            this.$_view.removeMediator(name);
         };
         Facade.prototype.retrieveMediator = function (name) {
-            return this.$view.retrieveMediator(name);
+            return this.$_view.retrieveMediator(name);
         };
         Facade.prototype.hasMediator = function (name) {
-            return this.$view.hasMediator(name);
+            return this.$_view.hasMediator(name);
         };
         Facade.prototype.sendNotification = function (name, data, cancelable) {
-            this.$view.notifyObservers(name, data, cancelable);
+            this.$_view.notifyObservers(name, data, cancelable);
         };
         Facade.prototype.notifyCancel = function () {
-            this.$view.notifyCancel();
+            this.$_view.notifyCancel();
         };
         Facade.DEBUG = true;
         Facade.inst = null;
@@ -138,7 +138,7 @@ var puremvc;
             Model.inst = this;
         }
         Model.prototype.registerProxy = function (proxy) {
-            var name = proxy.getProxyName();
+            var name = proxy.$_getProxyName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Register invalid proxy");
             }
@@ -192,17 +192,17 @@ var puremvc;
         __extends(Proxy, _super);
         function Proxy(name, data) {
             var _this = _super.call(this) || this;
-            _this.$proxyName = null;
+            _this.$_proxyName = null;
             _this.$data = void 0;
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Invalid proxy name");
             }
             _this.$data = data;
-            _this.$proxyName = name;
+            _this.$_proxyName = name;
             return _this;
         }
-        Proxy.prototype.getProxyName = function () {
-            return this.$proxyName || null;
+        Proxy.prototype.$_getProxyName = function () {
+            return this.$_proxyName || null;
         };
         Proxy.prototype.onRegister = function () {
         };
@@ -306,8 +306,8 @@ var puremvc;
             for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    observers.splice(i, 1);
-                    this.$pool.push(observer);
+                    observer.args = observer.caller = observer.method = null;
+                    this.$pool.push(observers.splice(i, 1)[0]);
                     break;
                 }
             }
@@ -362,7 +362,7 @@ var puremvc;
             this.$isCanceled = true;
         };
         View.prototype.registerMediator = function (mediator) {
-            var name = mediator.getMediatorName();
+            var name = mediator.$_getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Register invalid mediator");
             }
@@ -382,7 +382,7 @@ var puremvc;
             }
             var mediator = this.$mediators[name];
             delete this.$mediators[name];
-            mediator.removeNotificationInterests();
+            mediator.$_removeNotificationInterests();
             mediator.onRemove();
         };
         View.prototype.retrieveMediator = function (name) {
@@ -399,16 +399,16 @@ var puremvc;
         __extends(MacroCommand, _super);
         function MacroCommand() {
             var _this = _super.call(this) || this;
-            _this.$commands = [];
+            _this.$_commands = [];
             _this.$initializeMacroCommand();
             return _this;
         }
         MacroCommand.prototype.$addSubCommand = function (cls) {
-            this.$commands.push(cls);
+            this.$_commands.push(cls);
         };
         MacroCommand.prototype.execute = function () {
-            for (var i = 0; i < this.$commands.length; i++) {
-                var cmd = new this.$commands[i]();
+            for (var i = 0; i < this.$_commands.length; i++) {
+                var cmd = new this.$_commands[i]();
                 cmd.execute.apply(cmd, arguments);
             }
         };
@@ -419,30 +419,30 @@ var puremvc;
         __extends(Mediator, _super);
         function Mediator(name, viewComponent) {
             var _this = _super.call(this) || this;
-            _this.$mediatorName = null;
-            _this.$notificationInterests = [];
+            _this.$_mediatorName = null;
+            _this.$_notificationInterests = [];
             _this.$viewComponent = null;
             if (isStringNullOrEmpty(name) === true) {
                 throw Error("Invalid mediator name");
             }
-            _this.$mediatorName = name;
+            _this.$_mediatorName = name;
             _this.$viewComponent = viewComponent || null;
             return _this;
         }
-        Mediator.prototype.getMediatorName = function () {
-            return this.$mediatorName;
+        Mediator.prototype.$_getMediatorName = function () {
+            return this.$_mediatorName;
         };
         Mediator.prototype.listNotificationInterests = function () {
         };
-        Mediator.prototype.removeNotificationInterests = function () {
-            for (var i = 0; i < this.$notificationInterests.length; i++) {
-                var observer = this.$notificationInterests[i];
+        Mediator.prototype.$_removeNotificationInterests = function () {
+            for (var i = 0; i < this.$_notificationInterests.length; i++) {
+                var observer = this.$_notificationInterests[i];
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
         };
         Mediator.prototype.$handleNotification = function (name, method, priority, args) {
             var observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
-            observer && this.$notificationInterests.push(observer);
+            observer && this.$_notificationInterests.push(observer);
         };
         Mediator.prototype.onRegister = function () {
         };

@@ -8,7 +8,7 @@ module puremvc {
         /**
          * 命令列表
          */
-        private $commands: Array<new () => ICommand> = [];
+        private $_commands: Array<new () => ICommand> = [];
 
         constructor() {
             super();
@@ -30,15 +30,15 @@ module puremvc {
          * export
          */
         protected $addSubCommand(cls: new () => ICommand): void {
-            this.$commands.push(cls);
+            this.$_commands.push(cls);
         }
 
         /**
          * export
          */
         execute(): void {
-            for (let i: number = 0; i < this.$commands.length; i++) {
-                const cmd: ICommand = new this.$commands[i]();
+            for (let i: number = 0; i < this.$_commands.length; i++) {
+                const cmd: ICommand = new this.$_commands[i]();
                 cmd.execute.apply(cmd, arguments);
             }
         }

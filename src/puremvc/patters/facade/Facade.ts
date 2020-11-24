@@ -41,19 +41,19 @@ module puremvc {
             return Facade.inst;
         }
 
-        private $view: View = new View();
-        private $model: Model = new Model();
-        private $controller: Controller = new Controller();
+        private $_view: View = new View();
+        private $_model: Model = new Model();
+        private $_controller: Controller = new Controller();
 
         constructor() {
             if (Facade.inst !== null) {
                 throw Error(`Facade singleton already constructed!`);
             }
             Facade.inst = this;
-            this.$initializeFacade();
+            this.$_initializeFacade();
         }
 
-        private $initializeFacade(): void {
+        private $_initializeFacade(): void {
             this.$initializeModel();
             this.$initializeController();
             this.$initializeView();
@@ -93,7 +93,7 @@ module puremvc {
          * export
          */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: number, args?: any[]): void {
-            this.$view.registerObserver(name, method, caller, receiveOnce, priority, args);
+            this.$_view.registerObserver(name, method, caller, receiveOnce, priority, args);
         }
 
         /**
@@ -101,7 +101,7 @@ module puremvc {
          * export
          */
         removeObserver(name: string, method: Function, caller: Object): void {
-            this.$view.removeObserver(name, method, caller);
+            this.$_view.removeObserver(name, method, caller);
         }
 
         /**
@@ -113,7 +113,7 @@ module puremvc {
          * export
          */
         registerCommand(name: string, cls: new () => ICommand, priority?: number, args?: any[]): void {
-            this.$controller.registerCommand(name, cls, priority, args);
+            this.$_controller.registerCommand(name, cls, priority, args);
         }
 
         /**
@@ -121,7 +121,7 @@ module puremvc {
          * export
          */
         removeCommand(name: string): void {
-            this.$controller.removeCommand(name);
+            this.$_controller.removeCommand(name);
         }
 
         /**
@@ -129,7 +129,7 @@ module puremvc {
          * export
          */
         hasCommand(name: string): boolean {
-            return this.$controller.hasCommand(name);
+            return this.$_controller.hasCommand(name);
         }
 
         /**
@@ -139,7 +139,7 @@ module puremvc {
          * export
          */
         registerProxy(proxy: Proxy<any>): void {
-            this.$model.registerProxy(proxy);
+            this.$_model.registerProxy(proxy);
         }
 
         /**
@@ -147,7 +147,7 @@ module puremvc {
          * export
          */
         removeProxy(name: string): void {
-            this.$model.removeProxy(name);
+            this.$_model.removeProxy(name);
         }
 
         /**
@@ -157,7 +157,7 @@ module puremvc {
          * export
          */
         retrieveProxy(name: string): Proxy<any> {
-            return this.$model.retrieveProxy(name);
+            return this.$_model.retrieveProxy(name);
         }
 
         /**
@@ -165,7 +165,7 @@ module puremvc {
          * export
          */
         hasProxy(name: string): boolean {
-            return this.$model.hasProxy(name);
+            return this.$_model.hasProxy(name);
         }
 
         /**
@@ -175,7 +175,7 @@ module puremvc {
          * export
          */
         registerMediator(mediator: Mediator<any>): void {
-            this.$view.registerMediator(mediator);
+            this.$_view.registerMediator(mediator);
         }
 
         /**
@@ -183,7 +183,7 @@ module puremvc {
          * export
          */
         removeMediator(name: string): void {
-            this.$view.removeMediator(name);
+            this.$_view.removeMediator(name);
         }
 
         /**
@@ -193,7 +193,7 @@ module puremvc {
          * export
          */
         retrieveMediator(name: string): Mediator<any> {
-            return this.$view.retrieveMediator(name);
+            return this.$_view.retrieveMediator(name);
         }
 
         /**
@@ -201,7 +201,7 @@ module puremvc {
          * export
          */
         hasMediator(name: string): boolean {
-            return this.$view.hasMediator(name);
+            return this.$_view.hasMediator(name);
         }
 
         /**
@@ -211,7 +211,7 @@ module puremvc {
          * export
          */
         sendNotification(name: string, data?: any, cancelable?: boolean): void {
-            this.$view.notifyObservers(name, data, cancelable);
+            this.$_view.notifyObservers(name, data, cancelable);
         }
 
         /**
@@ -221,7 +221,7 @@ module puremvc {
          * export
          */
         notifyCancel(): void {
-            this.$view.notifyCancel();
+            this.$_view.notifyCancel();
         }
     }
 }

@@ -114,8 +114,8 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    observers.splice(i, 1);
-                    this.$pool.push(observer);
+                    observer.args = observer.caller = observer.method = null;
+                    this.$pool.push(observers.splice(i, 1)[0]);
                     break;
                 }
             }
@@ -187,7 +187,7 @@ module puremvc {
         }
 
         registerMediator(mediator: Mediator<any>): void {
-            const name: string = mediator.getMediatorName();
+            const name: string = mediator.$_getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`Register invalid mediator`);
             }
@@ -208,7 +208,7 @@ module puremvc {
             }
             const mediator: Mediator<any> = this.$mediators[name];
             delete this.$mediators[name];
-            mediator.removeNotificationInterests();
+            mediator.$_removeNotificationInterests();
             mediator.onRemove();
         }
 
