@@ -108,7 +108,6 @@ var puremvc;
             MutexLocker.active(suncore.MsgQModEnum.MMI);
             var observer = this.$view.registerObserver(name, method, caller, receiveOnce, priority, option);
             MutexLocker.deactive();
-            return observer;
         };
         Facade.prototype.removeObserver = function (name, method, caller) {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
