@@ -162,12 +162,6 @@ declare module puremvc {
     }
 
     /**
-     * 观察者对象（内置对象，请勿在外部持有）
-     */
-    class Observer {
-    }
-
-    /**
      * 数据代理类
      */
     class Proxy<T> extends Notifier {
