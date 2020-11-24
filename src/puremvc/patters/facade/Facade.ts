@@ -67,7 +67,7 @@ module puremvc {
         protected $initMsgQ(): void {
             MutexLocker.scope = new MutexScope();
             MutexLocker.locker = new MutexScope();
-            MutexLocker.msgQMap["sun"] = suncore.MsgQModEnum.KAL;
+            MutexLocker.msgQMap["sun"] = suncore.MsgQModEnum.E_KAL;
             MutexLocker.msgQMap["MMI"] = suncore.MsgQModEnum.MMI;
         }
 

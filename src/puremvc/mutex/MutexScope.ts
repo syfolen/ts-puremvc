@@ -27,12 +27,12 @@ module puremvc {
         /**
          * 激活规则的模块
          */
-        private $actMsgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.NIL;
+        private $actMsgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.E_NIL;
 
         /**
          * 当前锁定的模块
          */
-        private $curMsgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.NIL;
+        private $curMsgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.E_NIL;
 
         /**
          * 规则作用对象（统计项包括：KAL, MMI, ANY, PREFIX）
@@ -49,11 +49,11 @@ module puremvc {
          */
         asserts(msgQMod: suncore.MsgQModEnum, target: Object): void {
             // 始终允许传递系统消息
-            if (msgQMod === suncore.MsgQModEnum.KAL) {
+            if (msgQMod === suncore.MsgQModEnum.E_KAL) {
                 return;
             }
             // 锁定空模块，或锁定系统模块时，允许传递任意消息
-            if (this.$curMsgQMod === suncore.MsgQModEnum.NIL || this.$curMsgQMod === suncore.MsgQModEnum.KAL) {
+            if (this.$curMsgQMod === suncore.MsgQModEnum.E_NIL || this.$curMsgQMod === suncore.MsgQModEnum.E_KAL) {
                 return;
             }
             // 锁定MMI通用模块时，仅允许传递MMI消息
@@ -108,7 +108,7 @@ module puremvc {
             let b: number = this.$target[MutexScope.MUTEX_REFERENCE_MMI] || 0;
             let c: number = this.$target[MutexScope.MUTEX_REFERENCE_ANY] || 0;
 
-            if (msgQMod === suncore.MsgQModEnum.KAL) {
+            if (msgQMod === suncore.MsgQModEnum.E_KAL) {
                 a++;
             }
             else if (msgQMod === suncore.MsgQModEnum.MMI) {
@@ -118,10 +118,10 @@ module puremvc {
                 c++;
             }
 
-            if (this.$curMsgQMod === suncore.MsgQModEnum.NIL || this.$curMsgQMod === suncore.MsgQModEnum.KAL) {
+            if (this.$curMsgQMod === suncore.MsgQModEnum.E_NIL || this.$curMsgQMod === suncore.MsgQModEnum.E_KAL) {
                 this.$curMsgQMod = msgQMod;
             }
-            else if (this.$curMsgQMod === suncore.MsgQModEnum.MMI && msgQMod !== suncore.MsgQModEnum.KAL) {
+            else if (this.$curMsgQMod === suncore.MsgQModEnum.MMI && msgQMod !== suncore.MsgQModEnum.E_KAL) {
                 this.$curMsgQMod = msgQMod;
             }
 
@@ -136,7 +136,7 @@ module puremvc {
             let b: number = this.$target[MutexScope.MUTEX_REFERENCE_MMI] || 0;
             let c: number = this.$target[MutexScope.MUTEX_REFERENCE_ANY] || 0;
 
-            if (msgQMod === suncore.MsgQModEnum.KAL) {
+            if (msgQMod === suncore.MsgQModEnum.E_KAL) {
                 a--;
             }
             else if (msgQMod === suncore.MsgQModEnum.MMI) {
@@ -160,7 +160,7 @@ module puremvc {
                 this.$curMsgQMod = suncore.MsgQModEnum.MMI;
             }
             else if (a > 0) {
-                this.$curMsgQMod = suncore.MsgQModEnum.KAL;
+                this.$curMsgQMod = suncore.MsgQModEnum.E_KAL;
             }
             else {
                 this.$curMsgQMod = this.$actMsgQMod;
@@ -173,7 +173,7 @@ module puremvc {
          * 激活模块
          */
         active(msgQMod: suncore.MsgQModEnum): void {
-            if (this.$actMsgQMod === suncore.MsgQModEnum.NIL) {
+            if (this.$actMsgQMod === suncore.MsgQModEnum.E_NIL) {
                 this.$actMsgQMod = this.$curMsgQMod = msgQMod;
             }
         }
@@ -187,7 +187,7 @@ module puremvc {
             let c: number = this.$target[MutexScope.MUTEX_REFERENCE_ANY] || 0;
 
             if (a === 0 && b === 0 && c === 0) {
-                this.$actMsgQMod = this.$curMsgQMod = suncore.MsgQModEnum.NIL;
+                this.$actMsgQMod = this.$curMsgQMod = suncore.MsgQModEnum.E_NIL;
             }
         }
 

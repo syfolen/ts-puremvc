@@ -70,7 +70,7 @@ module puremvc {
             if (checkPrefix === false) {
                 return true;
             }
-            if (scope.curMsgQMod === suncore.MsgQModEnum.NIL || scope.curMsgQMod === suncore.MsgQModEnum.KAL || scope.curMsgQMod === suncore.MsgQModEnum.MMI) {
+            if (scope.curMsgQMod === suncore.MsgQModEnum.E_NIL || scope.curMsgQMod === suncore.MsgQModEnum.E_KAL || scope.curMsgQMod === suncore.MsgQModEnum.MMI) {
                 return true;
             }
             return mmiMsgQMap[scope.curMsgQMod] === true;

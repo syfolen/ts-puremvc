@@ -78,7 +78,7 @@ module test {
     class TestKal extends TestBase {
 
         constructor() {
-            super(suncore.MsgQModEnum.KAL);
+            super(suncore.MsgQModEnum.E_KAL);
         }
     }
 

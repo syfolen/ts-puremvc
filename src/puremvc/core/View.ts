@@ -262,8 +262,8 @@ module puremvc {
                     this.$onceObservers.push(observer);
                 }
                 if (observer.caller !== null && observer.caller.destroyed === true) {
-                    if (suncom && suncom["Common"]) {
-                        console.warn(`对象[${suncom["Common"].getQualifiedClassName(observer.caller)}]己销毁，未能响应${name}事件。`);
+                    if (suncom && suncom.Common) {
+                        console.warn(`对象[${suncom.Common.getQualifiedClassName(observer.caller)}]己销毁，未能响应${name}事件。`);
                     }
                     else {
                         console.warn(`对象己销毁，未能响应${name}事件。`);
