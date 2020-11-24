@@ -33,8 +33,13 @@ module puremvc {
             this.$viewComponent = viewComponent || null;
         }
 
+         * export
+         */
         protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void {
+            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
             observer && this.$var_notificationInterests.push(observer);
+        }
+
         /**
          * 获取实例名字
          */
