@@ -29,12 +29,12 @@ module puremvc {
             }
         }
 
-        registerCommand(name: string, cls: new () => ICommand, priority: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
+        registerCommand(name: string, cls: new () => ICommand, priority: suncom.EventPriorityEnum, args: any[]): void {
             if (this.hasCommand(name) === true) {
                 throw Error(`重复注册命令：${name}`);
             }
             this.$commands[name] = cls;
-            View.inst.registerObserver(name, this.executeCommand, this, false, priority, option);
+            View.inst.registerObserver(name, this.executeCommand, this, false, priority, args);
         }
 
         removeCommand(name: string): void {

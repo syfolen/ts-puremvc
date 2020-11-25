@@ -37,8 +37,8 @@ module puremvc {
          * 指定通知处理函数，接口说明请参考: Facade.registerObserver
          * export
          */
-        protected $handleNotification(name: string, method: Function, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option?: number | CareModuleID | any[] | IOption): void {
-            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, option);
+        protected $handleNotification(name: string, method: Function, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args?: any[]): void {
+            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
             observer && this.$var_notificationInterests.push(observer);
         }
 

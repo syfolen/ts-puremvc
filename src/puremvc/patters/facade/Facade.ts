@@ -120,28 +120,17 @@ module puremvc {
         }
 
         /**
-         * 指定关心模块状态的命令
-         * export
-         */
-        protected $setCareStatForCmd(cmd: string): void {
-            this.$var_view.setCareStatForCmd(cmd);
-        }
-
-        /**
          * 注册监听
          * @receiveOnce: 是否为一次性监听，默认为: false
          * @priority: 响应优先级，值越大，优先级越高，默认为：suncom.EventPriorityEnum.MID
-         * @option: 可选参数，默认为：1
-         * 1. 为number时表示回调函数的响应间隔延时，最小为：1
-         * 2. 为CareModuleID时表示消息所关心的系统模块
-         * 3. 为数组时代表执行回调函数时的默认参数
+         * @args[]: 回调参数列表，默认为: null
          * 说明：
          * 1. 若需覆盖参数，请先调用removeObserver移除监听后再重新注册
          * export
          */
-        registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, args?: any[]): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            const observer: Observer = this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, option);
+            const observer: Observer = this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, args);
             MutexLocker.deactive();
         }
 
@@ -174,9 +163,9 @@ module puremvc {
          * 1. 命令不可重复注册
          * export
          */
-        registerCommand(name: string, cls: new () => ICommand, priority?: suncom.EventPriorityEnum, option?: number | CareModuleID | any[] | IOption): void {
+        registerCommand(name: string, cls: new () => ICommand, priority?: suncom.EventPriorityEnum, args?: any[]): void {
             MutexLocker.deactive();
-            this.$var_controller.registerCommand(name, cls, priority, option);
+            this.$var_controller.registerCommand(name, cls, priority, args);
         }
 
         /**
@@ -289,14 +278,11 @@ module puremvc {
          * 派发通知
          * @data: 参数对象，允许为任意类型的数据，传递多个参数时可指定其为数组，若需要传递的data本身就是数组，则需要传递[data]
          * @cancelable: 通知是否允许被取消，默认为: true
-         * @force: 强制响应，默认为：false
-         * 说明：
-         * 1. 有些事件关心模块状态，在模块未激活的情况下，将force设为true可以强制响应这类事件
          * export
          */
-        sendNotification(name: string, data?: any, cancelable?: boolean, force?: boolean): void {
+        sendNotification(name: string, data?: any, cancelable?: boolean): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            this.$var_view.notifyObservers(name, data, cancelable, force);
+            this.$var_view.notifyObservers(name, data, cancelable);
             MutexLocker.deactive();
         }
 

@@ -34,43 +34,14 @@ module puremvc {
          */
         private $mediators: { [name: string]: Mediator<any> } = {};
 
-        /**
-         * suncore模块状态集合
-         */
-        private $modStatMap: { [mod: number]: boolean } = {};
-
-        /**
-         * 关心suncore模块状态的命令集合
-         */
-        private $careStatCmds: { [mod: number]: boolean } = {};
-
         constructor() {
             if (View.inst !== null) {
                 throw Error(`重复构建视图类！！！`);
             }
             View.inst = this;
-            this.registerObserver(suncore.NotifyKey.START_TIMELINE, this.$onStartTimeline, this);
-            this.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onPauseTimeline, this);
         }
 
-        private $onStartTimeline(mod: suncore.ModuleEnum, pause: boolean): void {
-            if (pause === false) {
-                this.$modStatMap[mod] = true;
-            }
-            else {
-                this.$modStatMap[mod] = false;
-            }
-        }
-
-        private $onPauseTimeline(mod: suncore.ModuleEnum, stop: boolean): void {
-            this.$modStatMap[mod] = false;
-        }
-
-        setCareStatForCmd(cmd: string): void {
-            this.$careStatCmds[cmd] = true;
-        }
-
-        registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, option: number | CareModuleID | any[] | IOption = 1): Observer {
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args: any[] = null): Observer {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的监听`);
             }
@@ -91,16 +62,6 @@ module puremvc {
                 this.$observers[name] = observers = observers.slice();
             }
 
-            // option应当始终为IOption类型的对象
-            option = this.$createOption(option);
-            if (option.delay === void 0) {
-                option.delay = 1;
-            }
-            if (option.delay < 1) {
-                throw Error(`事件响应间隔应当大于0`);
-            }
-            option.var_counter = 0;
-
             let index: number = -1;
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
@@ -116,10 +77,10 @@ module puremvc {
             MutexLocker.create(name, caller);
 
             const observer: Observer = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
+            observer.args = args;
             observer.name = name;
             observer.caller = caller;
             observer.method = method;
-            observer.option = option;
             observer.priority = priority;
             observer.receiveOnce = receiveOnce;
             if (index < 0) {
@@ -129,36 +90,6 @@ module puremvc {
                 observers.splice(index, 0, observer);
             }
             return observer;
-        }
-
-        private $createOption(data: any): IOption {
-            if (typeof data === "number") {
-                if (data < CareModuleID.E_NONE) {
-                    return {
-                        delay: data
-                    };
-                }
-                else {
-                    if (data === CareModuleID.CUSTOM) {
-                        return {
-                            careStatMod: suncore.ModuleEnum.CUSTOM
-                        };
-                    }
-                    else if (data === CareModuleID.TIMELINE) {
-                        return {
-                            careStatMod: suncore.ModuleEnum.TIMELINE
-                        };
-                    }
-                }
-            }
-            else if (data instanceof Array) {
-                return {
-                    args: data
-                };
-            }
-            else {
-                return data;
-            }
         }
 
         removeObserver(name: string, method: Function, caller: Object): void {
@@ -184,7 +115,7 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    observer.option = observer.caller = observer.method = null;
+                    observer.args = observer.caller = observer.method = null;
                     this.$pool.push(observers.splice(i, 1)[0]);
                     MutexLocker.release(name, caller);
                     break;
@@ -230,7 +161,7 @@ module puremvc {
             return false;
         }
 
-        notifyObservers(name: string, data?: any, cancelable: boolean = true, force: boolean = false): void {
+        notifyObservers(name: string, data?: any, cancelable: boolean = true): void {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`派发无效的通知`);
             }
@@ -250,13 +181,6 @@ module puremvc {
 
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: Observer = observers[i];
-                const option: IOption = observer.option;
-                // 关心模块状态的非强制性消息过滤
-                if (this.$careStatCmds[name] === true && force === false) {
-                    if (option.careStatMod !== void 0 && this.$modStatMap[option.careStatMod] !== true) {
-                        continue;
-                    }
-                }
                 // 一次性观察者入栈
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
@@ -271,15 +195,7 @@ module puremvc {
                     continue;
                 }
 
-                if (option.delay > 1) {
-                    option.var_counter++;
-                    if (option.var_counter < option.delay) {
-                        continue;
-                    }
-                    option.var_counter = 0;
-                }
-
-                const args: any = option.args ? option.args.concat(data) : data;
+                const args: any = observer.args === null ? data : observer.args.concat(data);
                 if (observer.caller === Controller.inst) {
                     observer.method.call(observer.caller, name, args);
                 }
