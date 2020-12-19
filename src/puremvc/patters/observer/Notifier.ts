@@ -7,7 +7,7 @@ module puremvc {
         /**
          * PureMVC外观引用
          */
-        private readonly $var_facade: Facade = Facade.getInstance();
+        private readonly $var_facade: IFacade = Facade.getInstance();
 
         /**
          * MsgQ消息模块标识，默认为: MMI
@@ -40,7 +40,7 @@ module puremvc {
          * 获取PureMVC外观引用
          * export
          */
-        protected get facade(): Facade {
+        protected get facade(): IFacade {
             MutexLocker.active(this.$var_msgQMod);
             return this.$var_facade;
         }
