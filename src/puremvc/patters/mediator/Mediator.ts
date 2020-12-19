@@ -1,10 +1,9 @@
 
 module puremvc {
     /**
-     * 视图中介者
      * export
      */
-    export class Mediator<T> extends Notifier {
+    export class Mediator<T> extends Notifier implements IMediator<T> {
         /**
          * 实例名字
          */
@@ -42,24 +41,17 @@ module puremvc {
             observer && this.$var_notificationInterests.push(observer);
         }
 
-        /**
-         * 获取实例名字
-         */
         func_getMediatorName(): string {
             return this.$var_mediatorName;
         }
 
         /**
-         * 列举感兴趣的通知
          * export
          */
         listNotificationInterests(): void {
 
         }
 
-        /**
-         * 移除感兴趣的通知列表
-         */
         func_removeNotificationInterests(): void {
             for (let i: number = 0; i < this.$var_notificationInterests.length; i++) {
                 const observer: Observer = this.$var_notificationInterests[i];
@@ -68,7 +60,6 @@ module puremvc {
         }
 
         /**
-         * 注册回调（此时己注册）
          * export
          */
         onRegister(): void {
@@ -76,7 +67,6 @@ module puremvc {
         }
 
         /**
-         * 移除回调（此时己移除）
          * export
          */
         onRemove(): void {
@@ -84,7 +74,6 @@ module puremvc {
         }
 
         /**
-         * 获取视图组件实例
          * export
          */
         getViewComponent(): T {
@@ -92,7 +81,6 @@ module puremvc {
         }
 
         /**
-         * 指定视图组件实例
          * export
          */
         setViewComponent(view: T): void {

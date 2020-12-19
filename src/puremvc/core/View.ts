@@ -32,7 +32,7 @@ module puremvc {
         /**
          * 视图中介者对象集合
          */
-        private $mediators: { [name: string]: Mediator<any> } = {};
+        private $mediators: { [name: string]: IMediator<any> } = {};
 
         constructor() {
             if (View.inst !== null) {
@@ -234,7 +234,7 @@ module puremvc {
             this.$isCanceled = true;
         }
 
-        registerMediator(mediator: Mediator<any>): void {
+        registerMediator(mediator: IMediator<any>): void {
             const name: string = mediator.func_getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的中介者对象`);
@@ -254,13 +254,13 @@ module puremvc {
             if (this.hasMediator(name) === false) {
                 throw Error(`移除不存在的中介者对象${name}`);
             }
-            const mediator: Mediator<any> = this.$mediators[name];
+            const mediator: IMediator<any> = this.$mediators[name];
             delete this.$mediators[name];
             mediator.func_removeNotificationInterests();
             mediator.onRemove();
         }
 
-        retrieveMediator(name: string): Mediator<any> {
+        retrieveMediator(name: string): IMediator<any> {
             if (MutexLocker.enableMMIAction() === false) {
                 throw Error(`非MMI模块禁用接口`);
             }

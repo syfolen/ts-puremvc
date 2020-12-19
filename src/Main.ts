@@ -4,7 +4,7 @@ Laya.init(600, 400, Laya.WebGL);
 
 class Facade extends puremvc.Facade {
 
-	static getInstance(): puremvc.Facade {
+	static getInstance(): puremvc.IFacade {
 		return puremvc.Facade.inst || new Facade();
 	}
 

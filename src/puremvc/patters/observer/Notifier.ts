@@ -1,10 +1,9 @@
 
 module puremvc {
     /**
-     * 通知派发者
      * export
      */
-    export class Notifier {
+    export class Notifier implements INotifier {
         /**
          * PureMVC外观引用
          */
@@ -31,7 +30,6 @@ module puremvc {
         }
 
         /**
-         * 销毁对象
          * export
          */
         destroy(): void {
@@ -48,7 +46,6 @@ module puremvc {
         }
 
         /**
-         * 获取消息派发者MsgQ消息模块标识
          * export
          */
         get msgQMod(): suncore.MsgQModEnum {
@@ -56,7 +53,6 @@ module puremvc {
         }
 
         /**
-         * 是否己销毁
          * export
          */
         get destroyed(): boolean {

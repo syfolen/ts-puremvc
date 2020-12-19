@@ -1,10 +1,9 @@
 
 module puremvc {
     /**
-     * 数据代理类
      * export
      */
-    export class Proxy<T> extends Notifier {
+    export class Proxy<T> extends Notifier implements IProxy<T> {
         /**
          * 代理名字
          */
@@ -28,15 +27,11 @@ module puremvc {
             this.$var_proxyName = name;
         }
 
-        /**
-         * 获取代理名字
-         */
         func_getProxyName(): string {
             return this.$var_proxyName || null;
         }
 
         /**
-         * 注册回调（此时己注册）
          * export
          */
         onRegister(): void {
@@ -44,7 +39,6 @@ module puremvc {
         }
 
         /**
-         * 移除回调（此时己移除）
          * export
          */
         onRemove(): void {
@@ -52,7 +46,6 @@ module puremvc {
         }
 
         /**
-         * 获取数据模型
          * export
          */
         getData(): T {
@@ -60,7 +53,6 @@ module puremvc {
         }
 
         /**
-         * 指定数据模型
          * export
          */
         setData(data: T): void {

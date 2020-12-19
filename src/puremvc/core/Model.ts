@@ -10,7 +10,7 @@ module puremvc {
         /**
          * 模型集合
          */
-        private $proxies: { [name: string]: Proxy<any> } = {};
+        private $proxies: { [name: string]: IProxy<any> } = {};
 
         constructor() {
             if (Model.inst !== null) {
@@ -19,7 +19,7 @@ module puremvc {
             Model.inst = this;
         }
 
-        registerProxy(proxy: Proxy<any>): void {
+        registerProxy(proxy: IProxy<any>): void {
             const name: string = proxy.func_getProxyName();
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的模型类`);
@@ -38,12 +38,12 @@ module puremvc {
             if (this.hasProxy(name) === false) {
                 throw Error(`移除不存在的模型类：${name}`);
             }
-            const proxy: Proxy<any> = this.$proxies[name];
+            const proxy: IProxy<any> = this.$proxies[name];
             delete this.$proxies[name];
             proxy.onRemove();
         }
 
-        retrieveProxy(name: string): Proxy<any> {
+        retrieveProxy(name: string): IProxy<any> {
             if (MutexLocker.enableMMIAction() === false) {
                 throw Error(`非MMI模块禁用接口`);
             }

@@ -77,7 +77,12 @@ declare module suncom {
         /**
          * 网页版
          */
-        WEB
+        WEB,
+
+        /**
+         * 原生平台
+         */
+        NATIVE
     }
 
     /**
@@ -125,54 +130,69 @@ declare module suncom {
         OSL
     }
 
-    interface IPCMInt2 {
-
-        arg1: number;
-
-        arg2: number;
-    }
-
-    interface IPCMIntString {
-
-        arg1: number;
-
-        arg2: string;
-    }
-
     /**
-     * 自定义事件系统中的事件信息
+     * 字典，通常用于作为一个大量数据的集合，用于快速获取数据集中的某条数据
+     * 说明：
+     * 1. 字典的主键值只允许为数字或字符串类型
+     * 2. 仅允许存储 Object 类型的数据
      */
-    class EventInfo {
+    interface IDictionary<T> {
+        /**
+         * 数据源（请勿直接操作其中的数据）
+         */
+        source: T[];
+
+        /**
+         * 添加数据
+         */
+        put(data: T): T;
+
+        /**
+         * 根据键值返回数据
+         */
+        getByValue(key: number | string, value: any): T;
+
+        /**
+         * 根据主键值快速返回数据
+         */
+        getByPrimaryValue(value: number | string): T;
+
+        /**
+         * 移除数据
+         */
+        remove(data: T): T;
+
+        /**
+         * 根据键值移除数据
+         */
+        removeByValue(key: number | string, value: any): T;
+
+        /**
+         * 根据主键值移除数据
+         */
+        removeByPrimaryValue(value: number | string): T;
+
+        /**
+         * 为每个数据执行方法
+         * 说明：
+         * 1. 若method返回true，则会中断遍历
+         * 2. 请勿在此方法中新增或移除数据
+         */
+        forEach(method: (data: T) => any): void;
     }
 
     /**
      * 自定义事件系统
      */
-    class EventSystem {
-        /**
-         * 事件对象集合（内置属性，请勿操作）
-         */
-        private $events: IDictionary<EventInfo[]>;
-
-        /**
-         * 避免注册与注销对正在派发的事件列表产生干扰（内置属性，请勿操作）
-         */
-        private $workings: IDictionary<boolean>;
-
-        /**
-         * 己执行的一次性事件对象列表（内置属性，请勿操作）
-         */
-        private $onceList: EventInfo[];
-
-        /**
-         * 事件是否己取消（内置属性，请勿操作）
-         */
-        private $isCanceled: boolean;
+    interface IEventSystem {
 
         /**
          * 事件注册
          * @receiveOnce: 是否只响应一次，默认为false
          * @priority: 事件优先级，优先级高的先被执行，默认为：EventPriorityEnum.MID
+         * @args[]: 回调参数列表，默认为: null
+         * 说明：
+         * 1. 若需覆盖参数，请先调用removeEventListener移除事件后再重新注册
          */
         addEventListener(type: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: EventPriorityEnum): void;
 
@@ -182,32 +202,36 @@ declare module suncom {
         removeEventListener(type: string, method: Function, caller: Object): void;
 
         /**
+         * 事件派发
+         * @data: 参数对象，允许为任意类型的数据，传递多个参数时可指定其为数组，若需要传递的data本身就是数组，则需要传递[data]
+         * @cancelable: 通知是否允许被取消，默认为: true
+         */
+        dispatchEvent(type: string, data?: any, cancelable?: boolean): void;
+
+        /**
          * 取消当前正在派发的事件
          */
         dispatchCancel(): void;
-
-        /**
-         * 事件派发
-         * @args: 参数列表，允许为任意类型的数据
-         * @cancelable: 事件是否允许被中断，默认为: true
-         */
-        dispatchEvent(type: string, args?: any, cancelable?: boolean): void;
     }
 
     /**
      * 期望异常测试类
      */
-    class Expect {
+    interface IExpect {
+        /**
+         * 期望相反
+         */
+        readonly not: IExpect;
 
         /**
          * 指定期望值
          */
-        expect(value: any): Expect;
+        expect(value: any): IExpect;
 
         /**
          * 解释异常
          */
-        interpret(str: string): Expect;
+        interpret(str: string): IExpect;
 
         /**
          * 测试执行接口，若测试未通过，则输出description
@@ -310,34 +334,12 @@ declare module suncom {
          * 深度相等且类型一致
          */
         toStrictEqual(value: any): void;
-
-        /**
-         * 期望相反
-         */
-        readonly not: Expect;
     }
 
     /**
      * 事件处理器
      */
-    class Handler {
-
-        /**
-         * 执行处理器
-         */
-        run(): any;
-
-        /**
-         * 执行处理器，携带额外的参数
-         * @args 参数列表，允许为任意类型的数据
-         */
-        runWith(args: any): any;
-
-        /**
-         * 回收对象
-         */
-        recover(): void;
-
+    interface IHandler {
         /**
          * 回调对象
          */
@@ -349,62 +351,154 @@ declare module suncom {
         readonly method: Function;
 
         /**
-         * 创建Handler的简单工厂方法
+         * 执行处理器
          */
-        static create(caller: Object, method: Function, args?: any[], once?: boolean): Handler;
+        run(): any;
+
+        /**
+         * 执行处理器，携带额外的参数
+         * @args: 参数列表，允许为任意类型的数据
+         */
+        runWith(args: any): any;
+
+        /**
+         * 回收到对象池
+         */
+        recover(): void;
     }
 
     /**
-     * 哈希表，通常用于作为一个大量数据的集合，用于快速获取数据集中的某条数据
+     * 哈希表，通常用于作为一个大量数据的集合
+     * 说明：
+     * 1. 哈希表的主键值允许为任意类型
+     * 2. 允许被存储的值为 null 或 undefined
      */
-    class HashMap<T> {
-        /**
-         * 数据源（请勿直接操作其中的数据）
-         */
-        source: T[];
+    interface IHashMap<K, V> {
 
         /**
-         * @primaryKey: 指定主键字段名，哈希表会使用主键值来作为数据索引，所以请确保主键值是恒值
+         * 返回字典中的条目数量
          */
-        constructor(primaryKey: number | string);
+        size(): number;
 
         /**
-         * 添加数据
+         * 是否存在从 key 到值的映射
          */
-        put(data: T): T;
+        exist(key: any): boolean;
 
         /**
-         * 根据键值返回数据
+         * 设置 key 所映射的值
          */
-        getByValue(key: number | string, value: any): T;
+        set(key: K, value: V): V;
 
         /**
-         * 根据主键值快速返回数据
+         * 获取 key 所映射的值
          */
-        getByPrimaryValue(value: number | string): T;
+        get(key: K): V;
 
         /**
-         * 移除数据
+         * 移除 key 及其所映射的值
          */
-        remove(data: T): T;
+        remove(key: K): V;
 
         /**
-         * 根据键值移除数据
+         * 清除所有数据
          */
-        removeByValue(key: number | string, value: any): T;
-
-        /**
-         * 根据主键值移除数据
-         */
-        removeByPrimaryValue(value: number | string): T;
+        clear(): void;
 
         /**
          * 为每个数据执行方法
          * 说明：
          * 1. 若method返回true，则会中断遍历
-         * 2. 谨慎在此方法中新增或移除数据
+         * 2. 请勿在此方法中新增或移除数据
          */
+        forEach(method: (value: V, key?: K) => any): void;
+    }
+
+    interface IPCMInt2 {
+
+        arg1: number;
+
+        arg2: number;
+    }
+
+    interface IPCMIntString {
+
+        arg1: number;
+
+        arg2: string;
+    }
+
+    class Dictionary<T> implements IDictionary<T> {
+
+        source: T[];
+
+        /**
+         * @primaryKey: 指定主键字段名，字典会使用主键值来作为数据索引，所以请确保主键值是恒值
+         */
+        constructor(primaryKey: number | string);
+
+        put(data: T): T;
+
+        getByValue(key: number | string, value: any): T;
+
+        getByPrimaryValue(value: number | string): T;
+
+        remove(data: T): T;
+
+        removeByValue(key: number | string, value: any): T;
+
+        removeByPrimaryValue(value: number | string): T;
+
         forEach(method: (data: T) => any): void;
+    }
+
+    class EventSystem implements IEventSystem {
+
+        addEventListener(type: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: EventPriorityEnum): void;
+
+        removeEventListener(type: string, method: Function, caller: Object): void;
+
+        dispatchEvent(type: string, data?: any, cancelable?: boolean): void;
+
+        dispatchCancel(): void;
+    }
+
+    /**
+     * 事件处理器
+     */
+    class Handler implements IHandler {
+
+        run(): any;
+
+        runWith(args: any): any;
+
+        recover(): void;
+
+        readonly caller: Object;
+
+        readonly method: Function;
+
+        /**
+         * 创建Handler的简单工厂方法
+         */
+        static create(caller: Object, method: Function, args?: any[], once?: boolean): IHandler;
+    }
+
+    class HashMap<K, V> implements IHashMap<K, V> {
+
+        size(): number;
+
+        exist(key: any): boolean;
+
+        set(key: K, value: V): V;
+
+        get(key: K): V;
+
+        remove(key: K): V;
+
+        clear(): void;
+
+        forEach(method: (value: V, key?: K) => any): void;
     }
 
     /**
@@ -416,6 +510,11 @@ declare module suncom {
          * 获取全局唯一的哈希值
          */
         function createHashId(): number;
+
+        /**
+         * 判断属性是否为 null 或未定义
+         */
+        function isNullOrUndefined(value: any): boolean;
 
         /**
          * 获取类名
@@ -436,23 +535,24 @@ declare module suncom {
 
         /**
          * 去除字符串的头尾空格
+         * 说明：
+         * 1. 当 str 为无效字符串时返回 null
          */
-        function trim(str?: string): string;
+        function trim(str: string): string;
 
         /**
          * 判断字符串是否为空
+         * 说明：
+         * 1. 当 value 为数字且不为 NaN 时返回 true
+         * 2. 当 value 为字符串且不为 "" 时返回 true
+         * 3. 否则返回 false
          */
-        function isStringNullOrEmpty(str: string | number): boolean;
+        function isStringNullOrEmpty(value: string | number): boolean;
 
         /**
          * 格式化字符串
          */
         function formatString(str: string, args: any[]): string;
-
-        /**
-         * 格式化字符串
-         */
-        function formatString$(str: string, args: any[]): string;
 
         /**
          * 将参数转化为 Date
@@ -487,9 +587,14 @@ declare module suncom {
         function formatDate(str: string, time: string | number | Date): string;
 
         /**
-         * 返回MD5加密后的串
+         * 返回 md5 加密后的串
          */
         function md5(str: string): string;
+
+        /**
+         * 获取 Url 参数值
+         */
+        function getQueryString(name: string, param?: string): string;
 
         /**
          * 生成HTTP签名
@@ -517,10 +622,10 @@ declare module suncom {
          * 从数组中查找数据
          * @array: 数据源
          * @method: 查询规则，返回true表示与规则匹配
-         * @out: 若不为null，则返回查询到的所有数据
+         * @out: 若不为null，则返回查询到的所有数据，默认为: null
          * @return: 若out为null，则只返回查询到的第一条数据，否则返回null
          */
-        function findFromArray<T>(array: T[], method: (data: T) => boolean, out?: T[]): T;
+        function findInArray<T>(array: T[], method: (data: T) => boolean, out?: T[]): T;
 
         /**
          * 将数据从数组中移除
@@ -613,6 +718,11 @@ declare module suncom {
          * 游戏版本，默认为：1.0.0
          */
         let VERSION: string;
+
+        /**
+         * 全局数据中心
+         */
+        const dataMap: { [key: string]: any };
     }
 
     /**
@@ -725,19 +835,20 @@ declare module suncom {
         /**
          * 根据标识从池中获取对象，获取失败时返回null
          */
-        function getItem<T>(sign: string): T;
+        function getItem(sign: string): any;
 
         /**
          * 根据标识从池中获取对象，获取失败时将创建新的对象
          * @cls: 对象类型，支持Laya.Prefab
          * @args: 构造函数参数列表，若cls为Laya.Prefab，则args应当为字符串
          */
-        function getItemByClass<T>(sign: string, cls: any, args?: any): T;
+        function getItemByClass(sign: string, cls: any, args?: any): any;
 
         /**
          * 根据标识回收对象
+         * @return: 成功入池时返回: true, 否则返回: false
          */
-        function recover(sign: string, item: any): void;
+        function recover(sign: string, item: any): boolean;
 
         /**
          * 清缓指定标识下的所有己缓存对象
@@ -778,7 +889,7 @@ declare module suncom {
         /**
          * 期望测试
          */
-        function expect(value: any, description?: string): Expect;
+        function expect(value: any, description?: string): IExpect;
 
         /**
          * 期望之外的，执行此方法时直接触发ASSERT_FAILED
@@ -795,8 +906,4 @@ declare module suncom {
          */
         function assertFalse(value: boolean, message?: string): void;
     }
-
-    type IDictionary<T> = { [key: string]: T };
-
-    type IDictionaryI<T> = { [key: number]: T };
 }
