@@ -29,9 +29,9 @@ module puremvc {
             return Facade.inst;
         }
 
-        private $var_view: View = new View();
-        private $var_model: Model = new Model();
-        private $var_controller: Controller = new Controller();
+        private $var_view: IView = new View();
+        private $var_model: IModel = new Model();
+        private $var_controller: IController = new Controller();
 
         constructor() {
             if (Facade.inst !== null) {
@@ -112,7 +112,7 @@ module puremvc {
          */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, args?: any[]): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            const observer: Observer = this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, args);
+            const observer: IObserver = this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, args);
             MutexLocker.deactive();
         }
 

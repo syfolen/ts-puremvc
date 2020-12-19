@@ -12,7 +12,7 @@ module puremvc {
         /**
          * 视图感兴趣的通知列表
          */
-        private $var_notificationInterests: Observer[] = [];
+        private $var_notificationInterests: IObserver[] = [];
 
         /**
          * 视图组件实例，未初始化时值为：null
@@ -37,7 +37,7 @@ module puremvc {
          * export
          */
         protected $handleNotification(name: string, method: Function, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args?: any[]): void {
-            const observer: Observer = View.inst.registerObserver(name, method, this, void 0, priority, args);
+            const observer: IObserver = View.inst.registerObserver(name, method, this, void 0, priority, args);
             observer && this.$var_notificationInterests.push(observer);
         }
 
@@ -54,7 +54,7 @@ module puremvc {
 
         func_removeNotificationInterests(): void {
             for (let i: number = 0; i < this.$var_notificationInterests.length; i++) {
-                const observer: Observer = this.$var_notificationInterests[i];
+                const observer: IObserver = this.$var_notificationInterests[i];
                 View.inst.removeObserver(observer.name, observer.method, observer.caller);
             }
         }

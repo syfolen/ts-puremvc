@@ -1,11 +1,9 @@
 
 module puremvc {
-    /**
-     * 控制类（命令集合）
-     */
-    export class Controller {
 
-        static inst: Controller = null;
+    export class Controller implements IController {
+
+        static inst: IController = null;
 
         /**
          * 命令集合

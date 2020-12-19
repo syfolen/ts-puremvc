@@ -3,14 +3,14 @@ module puremvc {
     /**
      * 视图类（视图集合）
      */
-    export class View {
+    export class View implements IView {
 
-        static inst: View = null;
+        static inst: IView = null;
 
         /**
          * 观察者对象对象池
          */
-        private $pool: Observer[] = [];
+        private $pool: IObserver[] = [];
         /**
          * 命令锁集合，用于防止注册与注销行为对正在响应的观察者列表产生干扰
          */
@@ -18,7 +18,7 @@ module puremvc {
         /**
          * 观察者对象集合
          */
-        private $observers: { [name: string]: Observer[] } = {};
+        private $observers: { [name: string]: IObserver[] } = {};
 
         /**
          * 通知是否己取消
@@ -27,7 +27,7 @@ module puremvc {
         /**
          * 己响应的一次性观察者列表
          */
-        private $onceObservers: Observer[] = [];
+        private $onceObservers: IObserver[] = [];
 
         /**
          * 视图中介者对象集合
@@ -41,7 +41,7 @@ module puremvc {
             View.inst = this;
         }
 
-        registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args: any[] = null): Observer {
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args: any[] = null): IObserver {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的监听`);
             }
@@ -51,7 +51,7 @@ module puremvc {
             if (caller === void 0) {
                 caller = null;
             }
-            let observers: Observer[] = this.$observers[name];
+            let observers: IObserver[] = this.$observers[name];
             // 若列表不存在，则新建
             if (observers === void 0) {
                 observers = this.$observers[name] = [];
@@ -64,7 +64,7 @@ module puremvc {
 
             let index: number = -1;
             for (let i: number = 0; i < observers.length; i++) {
-                const observer: Observer = observers[i];
+                const observer: IObserver = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     Facade.DEBUG === true && console.warn(`忽略重复注册的监听 name:${name}`);
                     return null;
@@ -76,7 +76,7 @@ module puremvc {
             }
             MutexLocker.create(name, caller);
 
-            const observer: Observer = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
+            const observer: IObserver = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
             observer.args = args;
             observer.name = name;
             observer.caller = caller;
@@ -102,7 +102,7 @@ module puremvc {
             if (caller === void 0) {
                 caller = null;
             }
-            let observers: Observer[] = this.$observers[name];
+            let observers: IObserver[] = this.$observers[name];
             if (observers === void 0) {
                 return;
             }
@@ -113,7 +113,7 @@ module puremvc {
             }
 
             for (let i: number = 0; i < observers.length; i++) {
-                const observer: Observer = observers[i];
+                const observer: IObserver = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     observer.args = observer.caller = observer.method = null;
                     this.$pool.push(observers.splice(i, 1)[0]);
@@ -138,12 +138,12 @@ module puremvc {
             if (method === null && caller === null) {
                 throw Error(`method和caller不允许同时为空`);
             }
-            let observers: Observer[] = this.$observers[name];
+            let observers: IObserver[] = this.$observers[name];
             if (observers === void 0) {
                 return false;
             }
             for (let i: number = 0; i < observers.length; i++) {
-                const observer: Observer = observers[i];
+                const observer: IObserver = observers[i];
                 if (method === null) {
                     if (observer.caller === caller) {
                         return true;
@@ -165,7 +165,7 @@ module puremvc {
             if (isStringNullOrEmpty(name) === true) {
                 throw Error(`派发无效的通知`);
             }
-            const observers: Observer[] = this.$observers[name];
+            const observers: IObserver[] = this.$observers[name];
             if (observers === void 0) {
                 return;
             }
@@ -180,7 +180,7 @@ module puremvc {
             this.$isCanceled = false;
 
             for (let i: number = 0; i < observers.length; i++) {
-                const observer: Observer = observers[i];
+                const observer: IObserver = observers[i];
                 // 一次性观察者入栈
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
@@ -225,7 +225,7 @@ module puremvc {
 
             // 注销一次性观察者
             while (this.$onceObservers.length > 0) {
-                const observer: Observer = this.$onceObservers.pop();
+                const observer: IObserver = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
             }
         }

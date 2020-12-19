@@ -1,11 +1,9 @@
 
 module puremvc {
-    /**
-     * 模型类（数据集合）
-     */
-    export class Model {
 
-        static inst: Model = null;
+    export class Model implements IModel {
+
+        static inst: IModel = null;
 
         /**
          * 模型集合
