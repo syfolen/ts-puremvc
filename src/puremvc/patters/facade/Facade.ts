@@ -22,7 +22,7 @@ module puremvc {
          * 获取单例对象
          * export
          */
-        static getInstance(): Facade {
+        static getInstance(): IFacade {
             if (Facade.inst === null) {
                 Facade.inst = new Facade();
             }
@@ -112,7 +112,7 @@ module puremvc {
          */
         registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: suncom.EventPriorityEnum, args?: any[]): void {
             MutexLocker.active(suncore.MsgQModEnum.MMI);
-            const observer: IObserver = this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, args);
+            this.$var_view.registerObserver(name, method, caller, receiveOnce, priority, args);
             MutexLocker.deactive();
         }
 
