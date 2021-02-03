@@ -10,6 +10,11 @@ module puremvc {
         private $var_proxyName: string = null;
 
         /**
+         * 当前锁定的 json 对象
+         */
+        private $var_lockData: any = null;
+
+        /**
          * 数据模型，未初始化时值为：void 0
          * export
          */
@@ -25,6 +30,7 @@ module puremvc {
             }
             this.$data = data;
             this.$var_proxyName = name;
+            this.$lockJsonData(data);
         }
 
         func_getProxyName(): string {
@@ -57,6 +63,32 @@ module puremvc {
          */
         setData(data: T): void {
             this.$data = data;
+            if (this.$var_lockData === null) {
+                this.$lockJsonData(data);
+            }
+        }
+
+        /**
+         * 锁定数据源
+         * export
+         */
+        protected $lockJsonData(data: any): void {
+            if (data instanceof Object && data instanceof Array === false) {
+                this.$var_lockData = data;
+            }
+        }
+
+        /**
+         * 为 json 对象设置默认的键值
+         * 说明：
+         * 1. 若值己存在，则不会被设置
+         * 2. 设用此方法
+         * export
+         */
+        protected $setDefaultJsonValue(key: string, value: any): void {
+            if (this.$var_lockData[key] === void 0) {
+                this.$var_lockData[key] = value;
+            }
         }
     }
 }
