@@ -2,7 +2,7 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -17,7 +17,7 @@ var puremvc;
         function Controller() {
             this.$commands = {};
             if (Controller.inst !== null) {
-                throw Error("Controller singleton already constructed!");
+                throw Error("\u91CD\u590D\u6784\u5EFA\u63A7\u5236\u7C7B\uFF01\uFF01\uFF01");
             }
             Controller.inst = this;
         }
@@ -32,14 +32,14 @@ var puremvc;
         };
         Controller.prototype.registerCommand = function (name, cls, priority, args) {
             if (this.hasCommand(name) === true) {
-                throw Error("Register duplicate command: " + name);
+                throw Error("\u91CD\u590D\u6CE8\u518C\u547D\u4EE4\uFF1A" + name);
             }
             this.$commands[name] = cls;
             View.inst.registerObserver(name, this.executeCommand, this, false, priority, args);
         };
         Controller.prototype.removeCommand = function (name) {
             if (this.hasCommand(name) === false) {
-                throw Error("Remove non-existent command: " + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684\u547D\u4EE4\uFF1A" + name);
             }
             delete this.$commands[name];
             View.inst.removeObserver(name, this.executeCommand, this);
@@ -57,7 +57,7 @@ var puremvc;
             this.$var_model = new Model();
             this.$var_controller = new Controller();
             if (Facade.inst !== null) {
-                throw Error("Facade singleton already constructed!");
+                throw Error("\u91CD\u590D\u6784\u5EFAPureMVC\u5916\u89C2\u7C7B\uFF01\uFF01\uFF01");
             }
             Facade.inst = this;
             this.$func_initializeFacade();
@@ -84,6 +84,9 @@ var puremvc;
         };
         Facade.prototype.removeObserver = function (name, method, caller) {
             this.$var_view.removeObserver(name, method, caller);
+        };
+        Facade.prototype.hasObserver = function (name, method, caller) {
+            return this.$var_view.hasObserver(name, method, caller);
         };
         Facade.prototype.registerCommand = function (name, cls, priority, args) {
             this.$var_controller.registerCommand(name, cls, priority, args);
@@ -133,27 +136,27 @@ var puremvc;
         function Model() {
             this.$proxies = {};
             if (Model.inst !== null) {
-                throw Error("Model singleton already constructed!");
+                throw Error("\u91CD\u590D\u6784\u5EFA\u6A21\u578B\u7C7B\uFF01\uFF01\uFF01");
             }
             Model.inst = this;
         }
         Model.prototype.registerProxy = function (proxy) {
             var name = proxy.func_getProxyName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid proxy");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u6A21\u578B\u7C7B");
             }
             if (this.hasProxy(name) === true) {
-                throw Error("Register duplicate proxy: " + name);
+                throw Error("\u91CD\u590D\u6CE8\u518C\u6A21\u578B\u7C7B\uFF1A" + name);
             }
             this.$proxies[name] = proxy;
             proxy.onRegister();
         };
         Model.prototype.removeProxy = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid proxy");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u6A21\u578B\u7C7B");
             }
             if (this.hasProxy(name) === false) {
-                throw Error("Remove non-existent proxy: " + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684\u6A21\u578B\u7C7B\uFF1A" + name);
             }
             var proxy = this.$proxies[name];
             delete this.$proxies[name];
@@ -193,12 +196,14 @@ var puremvc;
         function Proxy(name, data) {
             var _this = _super.call(this) || this;
             _this.$var_proxyName = null;
+            _this.$var_lockData = null;
             _this.$data = void 0;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid proxy name");
+                throw Error("\u65E0\u6548\u7684\u6A21\u578B\u7C7B\u540D\u5B57");
             }
             _this.$data = data;
             _this.$var_proxyName = name;
+            _this.$lockJsonData(data);
             return _this;
         }
         Proxy.prototype.func_getProxyName = function () {
@@ -213,6 +218,19 @@ var puremvc;
         };
         Proxy.prototype.setData = function (data) {
             this.$data = data;
+            if (this.$var_lockData === null) {
+                this.$lockJsonData(data);
+            }
+        };
+        Proxy.prototype.$lockJsonData = function (data) {
+            if (data instanceof Object && data instanceof Array === false) {
+                this.$var_lockData = data;
+            }
+        };
+        Proxy.prototype.$setDefaultJsonValue = function (key, value) {
+            if (this.$var_lockData[key] === void 0) {
+                this.$var_lockData[key] = value;
+            }
         };
         return Proxy;
     }(Notifier));
@@ -234,7 +252,7 @@ var puremvc;
             this.$onceObservers = [];
             this.$mediators = {};
             if (View.inst !== null) {
-                throw Error("View singleton already constructed!");
+                throw Error("\u91CD\u590D\u6784\u5EFA\u89C6\u56FE\u7C7B\uFF01\uFF01\uFF01");
             }
             View.inst = this;
         }
@@ -243,10 +261,10 @@ var puremvc;
             if (priority === void 0) { priority = 2; }
             if (args === void 0) { args = null; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid observer");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u76D1\u542C");
             }
             if (method === void 0 || method === null) {
-                throw Error("Register invalid observer method: " + name);
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u76D1\u542C\u56DE\u8C03\uFF1A" + name);
             }
             if (caller === void 0) {
                 caller = null;
@@ -287,10 +305,10 @@ var puremvc;
         };
         View.prototype.removeObserver = function (name, method, caller) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid observer");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u76D1\u542C");
             }
             if (method === void 0 || method === null) {
-                throw Error("Remove invalid observer method: " + name);
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u76D1\u542C\u56DE\u8C03\uFF1A" + name);
             }
             if (caller === void 0) {
                 caller = null;
@@ -316,10 +334,45 @@ var puremvc;
                 delete this.$observers[name];
             }
         };
+        View.prototype.hasObserver = function (name, method, caller) {
+            if (method === void 0) {
+                method = null;
+            }
+            if (caller === void 0) {
+                caller = null;
+            }
+            if (isStringNullOrEmpty(name) === true) {
+                throw Error("\u67E5\u8BE2\u65E0\u6548\u7684\u76D1\u542C");
+            }
+            if (method === null && caller === null) {
+                throw Error("method\u548Ccaller\u4E0D\u5141\u8BB8\u540C\u65F6\u4E3A\u7A7A");
+            }
+            var observers = this.$observers[name];
+            if (observers === void 0) {
+                return false;
+            }
+            for (var i = 0; i < observers.length; i++) {
+                var observer = observers[i];
+                if (method === null) {
+                    if (observer.caller === caller) {
+                        return true;
+                    }
+                }
+                else if (caller === null) {
+                    if (observer.method === method) {
+                        return true;
+                    }
+                }
+                else if (observer.method === method && observer.caller === caller) {
+                    return true;
+                }
+            }
+            return false;
+        };
         View.prototype.notifyObservers = function (name, data, cancelable) {
             if (cancelable === void 0) { cancelable = true; }
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Notify invalid command");
+                throw Error("\u6D3E\u53D1\u65E0\u6548\u7684\u901A\u77E5");
             }
             var observers = this.$observers[name];
             if (observers === void 0) {
@@ -364,10 +417,10 @@ var puremvc;
         View.prototype.registerMediator = function (mediator) {
             var name = mediator.func_getMediatorName();
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Register invalid mediator");
+                throw Error("\u6CE8\u518C\u65E0\u6548\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61");
             }
             if (this.hasMediator(name) === true) {
-                throw Error("Register duplicate mediator: " + name);
+                throw Error("\u91CD\u590D\u6CE8\u518C\u4E2D\u4ECB\u8005\u5BF9\u8C61" + name);
             }
             this.$mediators[name] = mediator;
             mediator.listNotificationInterests();
@@ -375,10 +428,10 @@ var puremvc;
         };
         View.prototype.removeMediator = function (name) {
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Remove invalid mediator");
+                throw Error("\u79FB\u9664\u65E0\u6548\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61");
             }
             if (this.hasMediator(name) === false) {
-                throw Error("Remove non-existent mediator: " + name);
+                throw Error("\u79FB\u9664\u4E0D\u5B58\u5728\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61" + name);
             }
             var mediator = this.$mediators[name];
             delete this.$mediators[name];
@@ -423,7 +476,7 @@ var puremvc;
             _this.$var_notificationInterests = [];
             _this.$viewComponent = null;
             if (isStringNullOrEmpty(name) === true) {
-                throw Error("Invalid mediator name");
+                throw Error("\u65E0\u6548\u7684\u4E2D\u4ECB\u8005\u5BF9\u8C61\u540D\u5B57");
             }
             _this.$var_mediatorName = name;
             _this.$viewComponent = viewComponent || null;

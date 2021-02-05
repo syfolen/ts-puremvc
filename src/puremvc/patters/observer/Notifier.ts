@@ -1,14 +1,13 @@
 
 module puremvc {
     /**
-     * 通知派发者
      * export
      */
-    export class Notifier {
+    export class Notifier implements INotifier {
         /**
          * PureMVC外观引用
          * export
          */
-        protected readonly facade: Facade = Facade.getInstance();
+        protected readonly facade: IFacade = Facade.getInstance();
     }
 }

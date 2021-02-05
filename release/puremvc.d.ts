@@ -23,41 +23,12 @@ declare module puremvc {
     /**
      * PureMVC外观类
      */
-    class Facade {
-        /**
-         * 调试模式，为true时会输出日志，默认为: true
-         */
-        static DEBUG: boolean;
-
-        /**
-         * 单例
-         */
-        static inst: Facade;
-
-        /**
-         * 获取单例对象
-         */
-        static getInstance(): Facade;
-
-        /**
-         * 初始化模型类（优先于控制类）
-         */
-        protected $initializeModel(): void;
-
-        /**
-         * 初始化视图类
-         */
-        protected $initializeView(): void;
-
-        /**
-         * 初始化控制类（优先于视图类）
-         */
-        protected $initializeController(): void;
+    interface IFacade {
 
         /**
          * 注册监听
          * @receiveOnce: 是否为一次性监听，默认为: false
-         * @priority: 响应优先级，值越大，优先级越高，默认为: 2
+         * @priority: 响应优先级，值越大，优先级越高，默认为：2
          * @args[]: 回调参数列表，默认为: null
          * 说明：
          * 1. 若需覆盖参数，请先调用removeObserver移除监听后再重新注册
@@ -68,6 +39,13 @@ declare module puremvc {
          * 移除监听
          */
         removeObserver(name: string, method: Function, caller: Object): void;
+
+        /**
+         * 查询是否存在观察者
+         * @method: 若为null，则只校验caller
+         * @caller: 若为null，则只校验method
+         */
+        hasObserver(name: string, method: Function, caller?: Object): boolean;
 
         /**
          * 注册命令
@@ -93,7 +71,7 @@ declare module puremvc {
          * 说明：
          * 1. 同一类型的实例不可重复注册
          */
-        registerProxy(proxy: Proxy<any>): void;
+        registerProxy(proxy: IProxy<any>): void;
 
         /**
          * 移除数据代理类实例
@@ -105,7 +83,7 @@ declare module puremvc {
          * 说明：
          * 1. 若实例不存在，则会返回: null
          */
-        retrieveProxy(name: string): Proxy<any>;
+        retrieveProxy(name: string): IProxy<any>;
 
         /**
          * 查询是否存在数据代理类实例
@@ -117,7 +95,7 @@ declare module puremvc {
          * 说明：
          * 1. 同一类型的实例不可重复注册
          */
-        registerMediator(mediator: Mediator<any>): void;
+        registerMediator(mediator: IMediator<any>): void;
 
         /**
          * 移除视图中介者实例
@@ -129,7 +107,7 @@ declare module puremvc {
          * 说明：
          * 1. 若实例不存在，则会返回: null
          */
-        retrieveMediator(name: string): Mediator<any>;
+        retrieveMediator(name: string): IMediator<any>;
 
         /**
          * 查询是否存在视图中介者实例
@@ -154,23 +132,13 @@ declare module puremvc {
     /**
      * 通知派发者
      */
-    class Notifier {
-        /**
-         * PureMVC外观引用
-         */
-        protected readonly facade: Facade;
+    interface INotifier {
     }
 
     /**
      * 数据代理类
      */
-    class Proxy<T> extends Notifier {
-        /**
-         * 数据模型，未初始化时值为：void 0
-         */
-        protected $data: T;
-
-        constructor(name: string, data?: T);
+    interface IProxy<T> extends INotifier {
 
         /**
          * 注册回调（此时己注册）
@@ -191,6 +159,144 @@ declare module puremvc {
          * 指定数据模型
          */
         setData(data: T): void;
+    }
+
+    /**
+     * 视图中介者
+     */
+    interface IMediator<T> extends INotifier {
+
+        /**
+         * 列举感兴趣的通知
+         */
+        listNotificationInterests(): void;
+
+        /**
+         * 注册回调（此时己注册）
+         */
+        onRegister(): void;
+
+        /**
+         * 移除回调（此时己移除）
+         */
+        onRemove(): void;
+
+        /**
+         * 获取视图组件实例
+         */
+        getViewComponent(): T;
+
+        /**
+         * 指定视图组件实例
+         */
+        setViewComponent(view: T): void;
+    }
+
+    class Facade implements IFacade {
+        /**
+         * 调试模式，为true时会输出日志，默认为: true
+         */
+        static DEBUG: boolean;
+
+        /**
+         * 单例
+         */
+        static inst: Facade;
+
+        /**
+         * 获取单例对象
+         */
+        static getInstance(): IFacade;
+
+        /**
+         * 初始化模型类（优先于控制类）
+         */
+        protected $initializeModel(): void;
+
+        /**
+         * 初始化视图类
+         */
+        protected $initializeView(): void;
+
+        /**
+         * 初始化控制类（优先于视图类）
+         */
+        protected $initializeController(): void;
+
+        registerObserver(name: string, method: Function, caller: Object, receiveOnce?: boolean, priority?: number, args?: any[]): void;
+
+        removeObserver(name: string, method: Function, caller: Object): void;
+
+        hasObserver(name: string, method: Function, caller?: Object): boolean;
+
+        registerCommand(name: string, cls: new () => ICommand, priority?: number, args?: any[]): void;
+
+        removeCommand(name: string): void;
+
+        hasCommand(name: string): boolean;
+
+        registerProxy(proxy: IProxy<any>): void;
+
+        /**
+         * 移除数据代理类实例
+         */
+        removeProxy(name: string): void;
+
+        retrieveProxy(name: string): IProxy<any>;
+
+        hasProxy(name: string): boolean;
+
+        registerMediator(mediator: IMediator<any>): void;
+
+        removeMediator(name: string): void;
+
+        retrieveMediator(name: string): IMediator<any>;
+
+        /**
+         * 查询是否存在视图中介者实例
+         */
+        hasMediator(name: string): boolean;
+
+        sendNotification(name: string, data?: any, cancelable?: boolean): void;
+
+        notifyCancel(): void;
+    }
+
+    class Notifier implements INotifier {
+        /**
+         * PureMVC外观引用
+         */
+        protected readonly facade: IFacade;
+    }
+
+    class Proxy<T> extends Notifier implements IProxy<T> {
+        /**
+         * 数据模型，未初始化时值为：void 0
+         */
+        protected $data: T;
+
+        constructor(name: string, data?: T);
+
+        onRegister(): void;
+
+        onRemove(): void;
+
+        getData(): T;
+
+        setData(data: T): void;
+
+        /**
+         * 锁定数据源
+         */
+        protected $lockJsonData(data: any): void;
+
+        /**
+         * 为 json 对象设置默认的键值
+         * 说明：
+         * 1. 若值己存在，则不会被设置
+         * 2. 设用此方法
+         */
+        protected $setDefaultJsonValue(key: string, value: any): void;
     }
 
     /**
@@ -223,10 +329,7 @@ declare module puremvc {
         execute(): void;
     }
 
-    /**
-     * 视图中介者
-     */
-    class Mediator<T> extends Notifier {
+    class Mediator<T> extends Notifier implements IMediator<T> {
         /**
          * 视图组件实例，未初始化时值为：null
          */
@@ -239,29 +342,14 @@ declare module puremvc {
          */
         protected $handleNotification(name: string, method: Function, priority?: number, args?: any[]): void;
 
-        /**
-         * 列举感兴趣的通知
-         */
         listNotificationInterests(): void;
 
-        /**
-         * 注册回调（此时己注册）
-         */
         onRegister(): void;
 
-        /**
-         * 移除回调（此时己移除）
-         */
         onRemove(): void;
 
-        /**
-         * 获取视图组件实例
-         */
         getViewComponent(): T;
 
-        /**
-         * 指定视图组件实例
-         */
         setViewComponent(view: T): void;
     }
 

@@ -3,7 +3,7 @@ module puremvc {
     /**
      * 观察者对象
      */
-    export class Observer {
+    export class Observer implements IObserver {
 
         args: any[] = null;
 
