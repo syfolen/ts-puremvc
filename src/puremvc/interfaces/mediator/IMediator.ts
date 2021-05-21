@@ -45,5 +45,11 @@ module puremvc {
          * export
          */
         setViewComponent(view: T): void;
+
+        /**
+         * 判断是否存在视图对象
+         * export
+         */
+        hasViewComponent(): boolean;
     }
 }

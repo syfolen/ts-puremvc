@@ -69,6 +69,22 @@ module puremvc {
         }
 
         /**
+         * 将数据转化成 boolean 返回
+         * export
+         */
+        hasData(): boolean {
+            return this.$data ? true : false;
+        }
+
+        /**
+         * 只要数据不为 void 0 就返回 true
+         * export
+         */
+        hasDataStrictly(): boolean {
+            return this.$data !== void 0;
+        }
+
+        /**
          * 锁定数据源
          * export
          */

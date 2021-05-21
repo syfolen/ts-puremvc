@@ -86,5 +86,12 @@ module puremvc {
         setViewComponent(view: T): void {
             this.$viewComponent = view || null;
         }
+
+        /**
+         * export
+         */
+        hasViewComponent(): boolean {
+            return this.$viewComponent !== null;
+        }
     }
 }

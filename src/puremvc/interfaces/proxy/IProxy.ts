@@ -34,5 +34,17 @@ module puremvc {
          * export
          */
         setData(data: T): void;
+
+        /**
+         * 将数据转化成 boolean 返回
+         * export
+         */
+        hasData(): boolean;
+
+        /**
+         * 只要数据不为 void 0 就返回 true
+         * export
+         */
+        hasDataStrictly(): boolean;
     }
 }
