@@ -30,6 +30,18 @@ module puremvc {
         private $onceObservers: IObserver[] = [];
 
         /**
+         * 观察者回收站
+         * 说明：
+         * 1. 事件派发过程中，所有回收的观察者会先进入回收站
+         * 2. 当事件派发彻底停止时，回收站中的的对象会被重置并重新进入对象池
+         */
+        private $recycle: IObserver[] = [];
+        /**
+         * 通知接口调用次数
+         */
+        private $notifyCount: number = 0;
+
+        /**
          * 视图中介者对象集合
          */
         private $mediators: { [name: string]: IMediator<any> } = {};
@@ -115,8 +127,7 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: IObserver = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    observer.args = observer.caller = observer.method = null;
-                    this.$pool.push(observers.splice(i, 1)[0]);
+                    this.$recycle.push(observers.splice(i, 1)[0]);
                     MutexLocker.release(name, caller);
                     break;
                 }
@@ -178,6 +189,8 @@ module puremvc {
             const isCanceled: boolean = this.$isCanceled;
             // 标记通知未取消
             this.$isCanceled = false;
+            // 事件调用次数 +1
+            this.$notifyCount++;
 
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: IObserver = observers[i];
@@ -186,12 +199,7 @@ module puremvc {
                     this.$onceObservers.push(observer);
                 }
                 if (observer.caller !== null && observer.caller.destroyed === true) {
-                    if (suncom && suncom.Common) {
-                        console.warn(`对象[${suncom.Common.getQualifiedClassName(observer.caller)}]己销毁，未能响应${name}事件。`);
-                    }
-                    else {
-                        console.warn(`对象己销毁，未能响应${name}事件。`);
-                    }
+                    console.warn(`对象[${suncom.Common.getQualifiedClassName(observer.caller)}]己销毁，未能响应${name}事件。`);
                     continue;
                 }
 
@@ -223,10 +231,22 @@ module puremvc {
             // 释放模块
             MutexLocker.unlock(name);
 
+            // 事件调用次数 -1
+            this.$notifyCount--;
+
             // 注销一次性观察者
             while (this.$onceObservers.length > 0) {
                 const observer: IObserver = this.$onceObservers.pop();
                 this.removeObserver(observer.name, observer.method, observer.caller);
+            }
+
+            // 若当前事件调用次数为 0 ，则回收站中的观察者入池
+            if (this.$notifyCount === 0) {
+                while (this.$recycle.length > 0) {
+                    const observer: IObserver = this.$recycle.pop();
+                    observer.args = observer.caller = observer.method = null;
+                    this.$pool.push(observer);
+                }
             }
         }
 
