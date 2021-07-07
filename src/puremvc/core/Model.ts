@@ -19,7 +19,7 @@ module puremvc {
 
         registerProxy(proxy: IProxy<any>): void {
             const name: string = proxy.func_getProxyName();
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的模型类`);
             }
             if (this.hasProxy(name) === true) {
@@ -30,7 +30,7 @@ module puremvc {
         }
 
         removeProxy(name: string): void {
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`移除无效的模型类`);
             }
             if (this.hasProxy(name) === false) {
@@ -42,16 +42,10 @@ module puremvc {
         }
 
         retrieveProxy(name: string): IProxy<any> {
-            if (MutexLocker.enableMMIAction() === false) {
-                throw Error(`非MMI模块禁用接口`);
-            }
             return this.$proxies[name] || null;
         }
 
         hasProxy(name: string): boolean {
-            if (MutexLocker.enableMMIAction() === false) {
-                throw Error(`非MMI模块禁用接口`);
-            }
             return this.$proxies[name] !== void 0;
         }
     }

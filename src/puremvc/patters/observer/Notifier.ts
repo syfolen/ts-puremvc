@@ -10,24 +10,10 @@ module puremvc {
         private readonly $var_facade: IFacade = Facade.getInstance();
 
         /**
-         * MsgQ消息模块标识，默认为: MMI
-         */
-        private $var_msgQMod: suncore.MsgQModEnum = suncore.MsgQModEnum.MMI;
-
-        /**
          * 是否己销毁
          * export
          */
         protected $destroyed: boolean = false;
-
-        /**
-         * export
-         */
-        constructor(msgQMod?: suncore.MsgQModEnum) {
-            if (msgQMod !== void 0) {
-                this.$var_msgQMod = msgQMod;
-            }
-        }
 
         /**
          * export
@@ -41,15 +27,7 @@ module puremvc {
          * export
          */
         protected get facade(): IFacade {
-            MutexLocker.active(this.$var_msgQMod);
             return this.$var_facade;
-        }
-
-        /**
-         * export
-         */
-        get msgQMod(): suncore.MsgQModEnum {
-            return this.$var_msgQMod;
         }
 
         /**

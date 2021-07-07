@@ -25,7 +25,7 @@ module puremvc {
          */
         constructor(name: string, data?: T) {
             super();
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`无效的模型类名字`);
             }
             this.$data = data;

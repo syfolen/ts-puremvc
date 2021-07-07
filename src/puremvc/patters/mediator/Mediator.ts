@@ -25,7 +25,7 @@ module puremvc {
          */
         constructor(name: string, viewComponent?: T) {
             super();
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`无效的中介者对象名字`);
             }
             this.$var_mediatorName = name;

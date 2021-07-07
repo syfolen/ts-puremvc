@@ -54,7 +54,7 @@ module puremvc {
         }
 
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args: any[] = null): IObserver {
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的监听`);
             }
             if (method === void 0 || method === null) {
@@ -86,7 +86,6 @@ module puremvc {
                     index = i;
                 }
             }
-            MutexLocker.create(name, caller);
 
             const observer: IObserver = this.$pool.length > 0 ? this.$pool.pop() : new Observer();
             observer.args = args;
@@ -105,7 +104,7 @@ module puremvc {
         }
 
         removeObserver(name: string, method: Function, caller: Object): void {
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`移除无效的监听`);
             }
             if (method === void 0 || method === null) {
@@ -128,7 +127,6 @@ module puremvc {
                 const observer: IObserver = observers[i];
                 if (observer.method === method && observer.caller === caller) {
                     this.$recycle.push(observers.splice(i, 1)[0]);
-                    MutexLocker.release(name, caller);
                     break;
                 }
             }
@@ -143,7 +141,7 @@ module puremvc {
         hasObserver(name: string, method: Function, caller: Object): boolean {
             if (method === void 0) { method = null; }
             if (caller === void 0) { caller = null; }
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`查询无效的监听`);
             }
             if (method === null && caller === null) {
@@ -173,7 +171,7 @@ module puremvc {
         }
 
         notifyObservers(name: string, data?: any, cancelable: boolean = true): void {
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`派发无效的通知`);
             }
             const observers: IObserver[] = this.$observers[name];
@@ -182,8 +180,6 @@ module puremvc {
             }
             // 锁定列表
             this.$lockers[name] = true;
-            // 锁定模块
-            MutexLocker.lock(name);
 
             // 记录历史通知状态
             const isCanceled: boolean = this.$isCanceled;
@@ -228,8 +224,6 @@ module puremvc {
             this.$isCanceled = isCanceled;
             // 解锁
             this.$lockers[name] = false;
-            // 释放模块
-            MutexLocker.unlock(name);
 
             // 事件调用次数 -1
             this.$notifyCount--;
@@ -256,7 +250,7 @@ module puremvc {
 
         registerMediator(mediator: IMediator<any>): void {
             const name: string = mediator.func_getMediatorName();
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的中介者对象`);
             }
             if (this.hasMediator(name) === true) {
@@ -268,7 +262,7 @@ module puremvc {
         }
 
         removeMediator(name: string): void {
-            if (isStringNullOrEmpty(name) === true) {
+            if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`移除无效的中介者对象`);
             }
             if (this.hasMediator(name) === false) {
@@ -281,16 +275,10 @@ module puremvc {
         }
 
         retrieveMediator(name: string): IMediator<any> {
-            if (MutexLocker.enableMMIAction() === false) {
-                throw Error(`非MMI模块禁用接口`);
-            }
             return this.$mediators[name] || null;
         }
 
         hasMediator(name: string): boolean {
-            if (MutexLocker.enableMMIAction() === false) {
-                throw Error(`非MMI模块禁用接口`);
-            }
             return this.$mediators[name] !== void 0;
         }
     }
