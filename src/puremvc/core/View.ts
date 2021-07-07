@@ -14,11 +14,11 @@ module puremvc {
         /**
          * 命令锁集合，用于防止注册与注销行为对正在响应的观察者列表产生干扰
          */
-        private $lockers: { [name: string]: boolean } = {};
+        private $lockers: suncom.KVString2Boolean = {};
         /**
          * 观察者对象集合
          */
-        private $observers: { [name: string]: IObserver[] } = {};
+        private $observers: suncom.KVString2Object<IObserver[]> = {};
 
         /**
          * 通知是否己取消
@@ -44,7 +44,7 @@ module puremvc {
         /**
          * 视图中介者对象集合
          */
-        private $mediators: { [name: string]: IMediator<any> } = {};
+        private $mediators: suncom.KVString2Object<IMediator<any>> = {};
 
         constructor() {
             if (View.inst !== null) {

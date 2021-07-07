@@ -33,17 +33,17 @@ module puremvc {
         /**
          * MsgQ模块集
          */
-        export const msgQMap: { [prefix: string]: suncore.MsgQModEnum } = {};
+        export const msgQMap: suncom.KVString2Object<suncore.MsgQModEnum> = {};
 
         /**
          * MsgQ模块前缀集
          */
-        export const msgQCmd: { [msgQMod: number]: string } = {};
+        export const msgQCmd: suncom.KVNumber2String = {};
 
         /**
          * 表现层MsgQ模块集
          */
-        export const mmiMsgQMap: { [msgQMod: number]: boolean } = {};
+        export const mmiMsgQMap: suncom.KVNumber2Boolean = {};
 
         /**
          * 获取命令前缀

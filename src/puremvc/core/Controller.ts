@@ -8,7 +8,7 @@ module puremvc {
         /**
          * 命令集合
          */
-        private $commands: { [name: string]: new () => ICommand } = {};
+        private $commands: suncom.KVString2Object<new () => ICommand> = {};
 
         constructor() {
             if (Controller.inst !== null) {

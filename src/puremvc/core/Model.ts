@@ -8,7 +8,7 @@ module puremvc {
         /**
          * 模型集合
          */
-        private $proxies: { [name: string]: IProxy<any> } = {};
+        private $proxies: suncom.KVString2Object<IProxy<any>> = {};
 
         constructor() {
             if (Model.inst !== null) {

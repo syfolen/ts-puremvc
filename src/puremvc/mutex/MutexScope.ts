@@ -37,7 +37,7 @@ module puremvc {
         /**
          * 规则作用对象（统计项包括：KAL, MMI, ANY, PREFIX）
          */
-        private $target: { [name: string]: any } = {};
+        private $target: suncom.KVString2Object<any> = {};
 
         /**
          * 快照列表
