@@ -17,7 +17,7 @@ module puremvc {
         /**
          * 回调对象 
          */
-        caller: any;
+        caller: Object;
 
         /**
          * 回调方法

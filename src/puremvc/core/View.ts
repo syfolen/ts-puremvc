@@ -54,14 +54,13 @@ module puremvc {
         }
 
         registerObserver(name: string, method: Function, caller: Object, receiveOnce: boolean = false, priority: suncom.EventPriorityEnum = suncom.EventPriorityEnum.MID, args: any[] = null): IObserver {
+            if (method === void 0) { method = null; }
+            if (caller === void 0) { caller = null; }
             if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`注册无效的监听`);
             }
-            if (method === void 0 || method === null) {
+            if (method === null) {
                 throw Error(`注册无效的监听回调：${name}`);
-            }
-            if (caller === void 0) {
-                caller = null;
             }
             let observers: IObserver[] = this.$observers[name];
             // 若列表不存在，则新建
@@ -78,7 +77,7 @@ module puremvc {
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: IObserver = observers[i];
                 if (observer.method === method && observer.caller === caller) {
-                    Facade.DEBUG === true && console.warn(`忽略重复注册的监听 name:${name}`);
+                    suncom.Logger.warn(`忽略重复注册的监听 name:${name}`);
                     return null;
                 }
                 // 优先级高的通知先执行
@@ -104,14 +103,13 @@ module puremvc {
         }
 
         removeObserver(name: string, method: Function, caller: Object): void {
+            if (method === void 0) { method = null; }
+            if (caller === void 0) { caller = null; }
             if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`移除无效的监听`);
             }
-            if (method === void 0 || method === null) {
+            if (method === null) {
                 throw Error(`移除无效的监听回调：${name}`);
-            }
-            if (caller === void 0) {
-                caller = null;
             }
             let observers: IObserver[] = this.$observers[name];
             if (observers === void 0) {
@@ -144,8 +142,8 @@ module puremvc {
             if (suncom.Common.isStringNullOrEmpty(name) === true) {
                 throw Error(`查询无效的监听`);
             }
-            if (method === null && caller === null) {
-                throw Error(`method和caller不允许同时为空`);
+            if (method === null) {
+                throw Error(`查询无效的监听回调！！！`);
             }
             let observers: IObserver[] = this.$observers[name];
             if (observers === void 0) {
@@ -153,17 +151,7 @@ module puremvc {
             }
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: IObserver = observers[i];
-                if (method === null) {
-                    if (observer.caller === caller) {
-                        return true;
-                    }
-                }
-                else if (caller === null) {
-                    if (observer.method === method) {
-                        return true;
-                    }
-                }
-                else if (observer.method === method && observer.caller === caller) {
+                if (observer.method === method && observer.caller === caller) {
                     return true;
                 }
             }
@@ -190,15 +178,31 @@ module puremvc {
 
             for (let i: number = 0; i < observers.length; i++) {
                 const observer: IObserver = observers[i];
+                const caller: Object = observer.caller;
                 // 一次性观察者入栈
                 if (observer.receiveOnce === true) {
                     this.$onceObservers.push(observer);
                 }
-                if (observer.caller !== null && observer.caller.destroyed === true) {
-                    console.warn(`对象[${suncom.Common.getQualifiedClassName(observer.caller)}]己销毁，未能响应${name}事件。`);
-                    continue;
+                if (caller !== null) {
+                    if (caller instanceof fairygui.GObject) {
+                        if (caller.isDisposed === true) {
+                            suncom.Logger.warn(`对象[${suncom.Common.getQualifiedClassName(caller)}]己销毁，未能响应${name}事件。`);
+                            continue;
+                        }
+                    }
+                    else if (caller instanceof Laya.Node || caller instanceof puremvc.Notifier) {
+                        if (caller.destroyed === true) {
+                            suncom.Logger.warn(`对象[${suncom.Common.getQualifiedClassName(caller)}]己销毁，未能响应${name}事件。`);
+                            continue;
+                        }
+                    }
+                    else if (caller instanceof suncore.BaseService) {
+                        if (caller.running === false) {
+                            suncom.Logger.warn(`服务[${suncom.Common.getQualifiedClassName(caller)}]己停止，未能响应${name}事件。`);
+                            continue;
+                        }
+                    }
                 }
-
                 const args: any = observer.args === null ? data : observer.args.concat(data);
                 if (observer.caller === Controller.inst) {
                     observer.method.call(observer.caller, name, args);
